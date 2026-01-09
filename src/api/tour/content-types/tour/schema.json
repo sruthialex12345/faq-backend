@@ -1,0 +1,21 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tours",
+  "info": {
+    "singularName": "tour",
+    "pluralName": "tours",
+    "displayName": "tour"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "destination": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    }
+  }
+}

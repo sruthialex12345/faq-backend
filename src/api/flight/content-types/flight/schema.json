@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "flights",
+  "info": {
+    "singularName": "flight",
+    "pluralName": "flights",
+    "displayName": "flight"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "origin": {
+      "type": "string"
+    },
+    "destination": {
+      "type": "string"
+    },
+    "fare": {
+      "type": "biginteger"
+    }
+  }
+}

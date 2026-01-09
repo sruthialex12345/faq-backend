@@ -1,0 +1,14 @@
+{
+  "kind": "collectionType",
+  "collectionName": "faqitems",
+  "info": {
+    "singularName": "faqitem",
+    "pluralName": "faqitems",
+    "displayName": "faqitem"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {}
+}
