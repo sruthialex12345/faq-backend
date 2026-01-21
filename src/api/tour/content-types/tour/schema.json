@@ -16,6 +16,15 @@
     },
     "description": {
       "type": "text"
+    },
+    "price": {
+      "type": "decimal"
+    },
+    "duration": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
     }
   }
 }
