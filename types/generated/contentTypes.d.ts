@@ -495,32 +495,6 @@ export interface ApiDealDeal extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiFaqFaq extends Struct.SingleTypeSchema {
-  collectionName: 'faqs';
-  info: {
-    displayName: 'FAQ';
-    pluralName: 'faqs';
-    singularName: 'faq';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    faq: Schema.Attribute.Component<'faq.faq-item', true>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::faq.faq'> &
-      Schema.Attribute.Private;
-    publishedAt: Schema.Attribute.DateTime;
-    title: Schema.Attribute.String;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-  };
-}
-
 export interface ApiFaqitemFaqitem extends Struct.CollectionTypeSchema {
   collectionName: 'faqitems';
   info: {
@@ -720,6 +694,36 @@ export interface PluginContentReleasesReleaseAction
     >;
     type: Schema.Attribute.Enumeration<['publish', 'unpublish']> &
       Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface PluginFaqchatbotConfigFaqqa
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'chatbot_config_faqqas';
+  info: {
+    displayName: 'Chatbot-FAQ';
+    pluralName: 'faqqas';
+    singularName: 'faqqa';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    answer: Schema.Attribute.RichText & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'plugin::faqchatbot-config.faqqa'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    question: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1145,13 +1149,13 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::deal.deal': ApiDealDeal;
-      'api::faq.faq': ApiFaqFaq;
       'api::faqitem.faqitem': ApiFaqitemFaqitem;
       'api::flight.flight': ApiFlightFlight;
       'api::item.item': ApiItemItem;
       'api::tour.tour': ApiTourTour;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
+      'plugin::faqchatbot-config.faqqa': PluginFaqchatbotConfigFaqqa;
       'plugin::i18n.locale': PluginI18NLocale;
       'plugin::review-workflows.workflow': PluginReviewWorkflowsWorkflow;
       'plugin::review-workflows.workflow-stage': PluginReviewWorkflowsWorkflowStage;
