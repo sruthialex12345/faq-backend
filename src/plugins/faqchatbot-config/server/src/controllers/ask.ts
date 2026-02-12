@@ -2149,10 +2149,20 @@
 // );
 //   console.log("🤖 FINAL ANSWER:", finalAnswer);
 
+// if (realtimeResults && realtimeResults.type === "list") {
+//   ctx.body = {
+//     type: "text+collection",
+//     content: finalAnswer,
+//     title: realtimeResults.collection,
+//     schema: realtimeResults.schema,
+//     items: realtimeResults.items,
+//   };
+// } else {
 //   ctx.body = {
 //     type: "text",
 //     content: finalAnswer,
 //   };
+// }
 
 // } catch (err) {
 //   console.error("[ERROR]", err);
@@ -2160,7 +2170,6 @@
 // }
 //   },
 // });
-
 
 
 
@@ -2503,34 +2512,6 @@ Filter:
 - Prefer airport code if available
 
 --------------------------------
-COUNTRY → CITY NORMALIZATION (CRITICAL)
---------------------------------
-If the user mentions a COUNTRY instead of a city,
-you MUST infer the most common international
-airport city for that country.
-
-Do NOT return the country name directly
-because database stores cities, not countries.
-
-RULES:
-- Choose the most internationally recognized airport city
-- Prefer capital or largest metro airport
-- Use containsi on the CITY, not the country
-- Never return country names in filters
-
-Examples of reasoning (not fixed mappings):
-- Australia → major airport city (e.g., Sydney or Melbourne)
-- Japan → major airport city (e.g., Tokyo or Osaka)
-- Brazil → major airport city (e.g., São Paulo or Rio de Janeiro)
-- UAE → Dubai
-- Germany → Frankfurt or Berlin
-
-If multiple cities are possible:
-- Choose the most globally used airport
-- Prefer tourism/business hubs
-
-
---------------------------------
 TEXT FILTER RULES (VERY IMPORTANT)
 --------------------------------
 - For city names, titles, destinations, names → ALWAYS use "containsi"
@@ -2547,7 +2528,6 @@ Filters:
     { "destination": { "containsi": "amsterdam" } }
   ]
 }
-
 
 --------------------------------
 NUMBER FILTER RULES
@@ -2828,7 +2808,6 @@ if (realtimeResults && realtimeResults.type === "list") {
     content: finalAnswer,
   };
 }
-
 
 } catch (err) {
   console.error("[ERROR]", err);
