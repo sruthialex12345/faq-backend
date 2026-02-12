@@ -604,7 +604,7 @@ import {
 } from '@strapi/design-system';
 import { Check, File, Key, Plus } from '@strapi/icons';
 
-// @ts-ignore
+
 import { useFetchClient, useNotification } from '@strapi/admin/strapi-admin';
 
 type FieldConfig = {
@@ -797,9 +797,7 @@ const HomePage = () => {
             <Typography variant="beta" fontWeight="bold">
               Realtime Configuration
             </Typography>
-            <Typography variant="epsilon" textColor="neutral600">
-              Manage your AI search settings and API keys.
-            </Typography>
+            
           </Box>
 
           <Button onClick={save} loading={isSaving} startIcon={<Check />}>
@@ -818,9 +816,7 @@ const HomePage = () => {
               <Typography variant="delta" fontWeight="bold">
                 API Configuration
               </Typography>
-              <Typography variant="pi" textColor="neutral600">
-                Configure your OpenAI credentials.
-              </Typography>
+             
             </Box>
             <Button
               variant="tertiary"
@@ -855,9 +851,6 @@ const HomePage = () => {
             <Typography variant="delta" fontWeight="bold">
               Collections
             </Typography>
-            <Typography variant="pi" textColor="neutral600">
-              API content types.
-            </Typography>
           </Box>
 
           {renderCollections(apiCollections)}
@@ -873,9 +866,7 @@ const HomePage = () => {
               <Typography variant="delta" fontWeight="bold">
                 Chatbot FAQ
               </Typography>
-              <Typography variant="pi" textColor="neutral600">
-                Plugin-based FAQ collections.
-              </Typography>
+            
             </Box>
 
             {renderCollections(pluginCollections)}
