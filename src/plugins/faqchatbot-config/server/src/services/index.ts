@@ -1,8 +1,8 @@
 
-import service from "./service";
+import embed from "./embed";
 import config from "./config";
 
 export default {
   config,
-  service
+  embed
 };

@@ -2173,8 +2173,7 @@
 
 
 
-
-import OpenAI from "openai";
+ import OpenAI from "openai";
 
 
 const openai = new OpenAI({
@@ -2234,20 +2233,19 @@ if (!hasEnabledFields || ignored.includes(name)) {
   }
 }
 
-async function rephraseAndExtract(
-  history: any[],
-  question: string,
-  prevContext: any
-) {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    temperature: 0,
-    messages: [
-      {
-        role: "system",
-        content: `
-   You are a Search Optimizer + Context Extractor.
-
+async function rephraseQuestion(history: any[], question: string) {
+  if (!history || !Array.isArray(history) || history.length === 0) {
+    console.log("REWRITE: skipped (no history)");
+    return question;
+  }
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0,
+      messages: [
+        {
+          role: "system",
+          content: `You are a Search Query Optimizer.
         Your task is to determine if the user's new message is a **Follow-up** or a **New Topic** and if a follow-up just rewrite the question .
         Do NOT return any explanations, only the optimized search string.
 
@@ -2262,46 +2260,40 @@ async function rephraseAndExtract(
            - *Bad Output:* "Group booking for Commuter Pass" (Incorrect).
 
         3. **Output:**
-           - Return ONLY the optimized search string.
+           - Return ONLY the optimized search string.`
+        },
+        ...history.slice(-4),
+        { role: "user", content: question },
+      ],
+    });
+const rewritten = response.choices[0].message.content?.trim();
+console.log(`REWRITE: "${question}" → "${rewritten}"`);
 
-Return ONLY valid JSON.
+if (!rewritten) return question;
 
-FORMAT:
-{
-  "rewritten": "string",
-  "intent": "string or null",
-  "slots": {}
+const lower = rewritten.toLowerCase();
+
+// If model answered instead of rewriting → ignore
+if (
+  lower.includes("unavailable") ||
+  lower.includes("sorry") ||
+  lower.includes("i am") ||
+  lower.includes("cannot") ||
+  rewritten.length > 120
+) {
+  console.log("REWRITE REJECTED – using original question");
+  return question;
 }
 
-RULES:
-- Rewrite question if follow-up.
-- Extract ONLY NEW slots.
-- Do NOT repeat old slots.
-`
-      },
-      {
-        role: "user",
-        content: `
-HISTORY:
-${JSON.stringify(history.slice(-4))}
+return rewritten;
 
-PREVIOUS CONTEXT:
-${JSON.stringify(prevContext)}
 
-USER MESSAGE:
-${question}
-`
-      }
-    ]
-  });
-
-  try {
-    return JSON.parse(response.choices[0].message.content || "{}");
-  } catch {
-    return { rewritten: question, intent: null, slots: {} };
+  } catch (err) {
+    console.error("Error in rephraseQuestion:", err);
+    return question;
   }
+  
 }
-
 
 function sanitizeFilters(filters: any): any {
   if (!filters || typeof filters !== "object") return filters;
@@ -2330,42 +2322,31 @@ function sanitizeFilters(filters: any): any {
   return newFilters;
 }
 
-// function updateJsonContext(prevContext: any, question: string) {
-//   const MAX_HISTORY = 10;
+function updateJsonContext(prevContext: any, question: string) {
+  const MAX_HISTORY = 10;
 
-//   const ctx = { ...(prevContext || {}) };
+  const ctx = { ...(prevContext || {}) };
 
-//   // Maintain history
-//   ctx.history = Array.isArray(ctx.history) ? ctx.history : [];
-//   ctx.history.push(question);
-//   if (ctx.history.length > MAX_HISTORY) ctx.history.shift();
+  // Maintain history
+  ctx.history = Array.isArray(ctx.history) ? ctx.history : [];
+  ctx.history.push(question);
+  if (ctx.history.length > MAX_HISTORY) ctx.history.shift();
 
-//   // Simple keyword extraction
-//   const words = question
-//     .toLowerCase()
-//     .replace(/[^\w\s]/g, "")
-//     .split(" ")
-//     .filter((w) => w.length > 3);
+  // Simple keyword extraction
+  const words = question
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "")
+    .split(" ")
+    .filter((w) => w.length > 3);
 
-//   ctx.keywords = [...new Set([...(ctx.keywords || []), ...words])];
+  ctx.keywords = [...new Set([...(ctx.keywords || []), ...words])];
 
-//   ctx.lastQuestion = question;
+  ctx.lastQuestion = question;
 
-//   return ctx;
-// }
-
-function normalizeNumbers(obj: any) {
-  if (!obj || typeof obj !== "object") return;
-
-  for (const k in obj) {
-    const v = obj[k];
-    if (typeof v === "string") {
-      const n = parseInt(v);
-      if (!isNaN(n)) obj[k] = n;
-    }
-    if (typeof v === "object") normalizeNumbers(v);
-  }
+  return ctx;
 }
+
+
 async function searchRealtime(
   strapi: any,
   plan: any,
@@ -2379,8 +2360,7 @@ async function searchRealtime(
     return null;
   }
 
-const sanitizedFilters = sanitizeFilters(plan.filters || {});
-normalizeNumbers(sanitizedFilters);
+  const sanitizedFilters = sanitizeFilters(plan.filters || {});
   console.log(" SANITIZED FILTERS:", JSON.stringify(sanitizedFilters, null, 2));
 
   const config = activeCollections.find(
@@ -2434,6 +2414,22 @@ normalizeNumbers(sanitizedFilters);
 }
 
 
+function cosineSimilarity(a: number[], b: number[]) {
+  if (!a || !b || a.length !== b.length) return 0;
+
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
+
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
 
 async function searchFAQ(question: string, strapi: any) {
   console.log("FAQ SEARCH:", question);
@@ -2444,38 +2440,74 @@ async function searchFAQ(question: string, strapi: any) {
     input: question,
   });
 
-  const vector = embedding.data[0].embedding;
-  const knex = strapi.db.connection;
+  let queryVector = embedding.data[0].embedding;
 
-  // 2. Vector similarity search
-  const results = await knex("chatbot_config_faqqas")
-    .select(
-      "answer",
-      knex.raw("(embedding <=> ?::vector) AS distance", [
-        JSON.stringify(vector),
-      ])
-    )
-    .whereNotNull("published_at")
-    .orderByRaw("embedding <=> ?::vector", [JSON.stringify(vector)])
-    .limit(3);
+  // FORCE MATCH DB LENGTH
+  // queryVector = queryVector.slice(0, 1536);
 
-  // 3. If nothing useful
-  if (!results.length || results[0].distance > 0.85) {
+  if (!queryVector || !queryVector.length) {
+    console.log("FAQ: Query embedding failed");
+    return [];
+  }
+
+  console.log("QUERY VECTOR LENGTH:", queryVector.length);
+  // 2. Fetch all FAQ embeddings
+  const faqs = await strapi.db
+    .connection("chatbot_config_faqqas")
+    .select("answer", "embedding")
+    .whereNotNull("embedding")
+    .whereNotNull("published_at");
+
+  if (!faqs.length) return [];
+
+  // 3. Score similarity
+  const scored = faqs.map((f: any) => {
+    let dbVector = f.embedding;
+
+    try {
+      // If stored as string JSON → parse
+      if (typeof dbVector === "string") {
+        dbVector = JSON.parse(dbVector);
+      }
+
+      // Force all values to numbers
+      dbVector = Array.isArray(dbVector)
+        ? dbVector.map((n: any) => Number(n))
+        : [];
+
+      // Length mismatch guard
+      if (!Array.isArray(dbVector) || dbVector.length !== queryVector.length) {
+        return { answer: f.answer, similarity: 0 };
+      }
+
+      return {
+        answer: f.answer,
+        similarity: cosineSimilarity(queryVector, dbVector),
+      };
+    } catch (err) {
+      console.log("FAQ parse error:", err);
+      return { answer: f.answer, similarity: 0 };
+    }
+  });
+
+  // 4. Sort by similarity
+  scored.sort((a, b) => b.similarity - a.similarity);
+
+  console.log("TOP FAQ SIM:", scored[0]?.similarity);
+
+  // 5. Threshold check
+  if (!scored.length || scored[0].similarity < 0.40) {
     console.log("FAQ: No good match");
     return [];
   }
 
-  // 4. Return only answers
-  const answers = results.map((r: any) => r.answer);
-  console.log("FAQ MATCHES:", answers.length);
-
-  return answers;
+  // 6. Return top 3 answers
+  return scored.slice(0, 3).map((s) => s.answer);
 }
 
 async function simplePlanner(
   question: string,
-  activeCollections: any[],
-  context: any
+  activeCollections: any[]
 ) {
   console.log("🧠 AI PLANNER QUESTION:", question);
 
@@ -2627,13 +2659,6 @@ Otherwise return:
   "sort": []
 }
 
---------------------------------
-USER CONTEXT MEMORY
---------------------------------
-${JSON.stringify(context)}
-
-If user message is incomplete,
-use context slots to complete filters.
 
 --------------------------------
 AVAILABLE COLLECTIONS
@@ -2785,30 +2810,14 @@ ${realtimeText}
   return response.choices[0].message.content;
 }
 
-function mergeContext(prev: any, next: any) {
-  return {
-    intent: next.intent ?? prev.intent ?? null,
-    slots: {
-      ...(prev.slots || {}),
-      ...(next.slots || {})
-    }
-  };
-}
+
 export default ({ strapi }: { strapi: any }) => ({
   async ask(ctx: any) {
     const { question, history = [] } = ctx.request.body;
 
-let jsonContext = ctx.request.body.context || {};
-const aiResult = await rephraseAndExtract(
-  history,
-  question,
-  jsonContext
-);
-jsonContext = mergeContext(jsonContext, {
-  intent: aiResult.intent,
-  slots: aiResult.slots
-});
-console.log("JSON CONTEXT:", JSON.stringify(jsonContext, null, 2)); // 🔴 ADD THIS
+    let jsonContext = ctx.request.body.context || {};
+jsonContext = updateJsonContext(jsonContext, question);
+console.log(" JSON CONTEXT:", JSON.stringify(jsonContext, null, 2));
 
 ctx.set("X-User-Context", JSON.stringify(jsonContext));
     console.log("QUESTION:", question);
@@ -2820,15 +2829,15 @@ ctx.set("X-User-Context", JSON.stringify(jsonContext));
     console.log("No active collections");
   }
 
-const rewritten = aiResult.rewritten || question;
+  const rewritten = await rephraseQuestion(history, question);
   console.log("🧠 REWRITTEN QUESTION:", rewritten);
 
   // FAQ
   const faqResults = await searchFAQ(rewritten, strapi);
-  //console.log("📚 FAQ RESULTS:", JSON.stringify(faqResults, null, 2));
+  console.log("📚 FAQ RESULTS:", JSON.stringify(faqResults, null, 2));
 
   // PLAN
-const plan = await simplePlanner(rewritten, activeCollections, jsonContext);
+  const plan = await simplePlanner(rewritten, activeCollections);
   console.log("📌 PLANNER RESULT:", JSON.stringify(plan, null, 2));
 
   // REALTIME
