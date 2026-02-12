@@ -2234,19 +2234,20 @@ if (!hasEnabledFields || ignored.includes(name)) {
   }
 }
 
-async function rephraseQuestion(history: any[], question: string) {
-  if (!history || !Array.isArray(history) || history.length === 0) {
-    console.log("REWRITE: skipped (no history)");
-    return question;
-  }
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      temperature: 0,
-      messages: [
-        {
-          role: "system",
-          content: `You are a Search Query Optimizer.
+async function rephraseAndExtract(
+  history: any[],
+  question: string,
+  prevContext: any
+) {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    temperature: 0,
+    messages: [
+      {
+        role: "system",
+        content: `
+   You are a Search Optimizer + Context Extractor.
+
         Your task is to determine if the user's new message is a **Follow-up** or a **New Topic** and if a follow-up just rewrite the question .
         Do NOT return any explanations, only the optimized search string.
 
@@ -2261,19 +2262,46 @@ async function rephraseQuestion(history: any[], question: string) {
            - *Bad Output:* "Group booking for Commuter Pass" (Incorrect).
 
         3. **Output:**
-           - Return ONLY the optimized search string.`
-        },
-        ...history.slice(-4),
-        { role: "user", content: question },
-      ],
-    });
-    const rewritten = response.choices[0].message.content?.trim();
-    console.log(`REWRITE: "${question}" → "${rewritten}"`);
-    return rewritten || question;
+           - Return ONLY the optimized search string.
+
+Return ONLY valid JSON.
+
+FORMAT:
+{
+  "rewritten": "string",
+  "intent": "string or null",
+  "slots": {}
+}
+
+RULES:
+- Rewrite question if follow-up.
+- Extract ONLY NEW slots.
+- Do NOT repeat old slots.
+`
+      },
+      {
+        role: "user",
+        content: `
+HISTORY:
+${JSON.stringify(history.slice(-4))}
+
+PREVIOUS CONTEXT:
+${JSON.stringify(prevContext)}
+
+USER MESSAGE:
+${question}
+`
+      }
+    ]
+  });
+
+  try {
+    return JSON.parse(response.choices[0].message.content || "{}");
   } catch {
-    return question;
+    return { rewritten: question, intent: null, slots: {} };
   }
 }
+
 
 function sanitizeFilters(filters: any): any {
   if (!filters || typeof filters !== "object") return filters;
@@ -2302,31 +2330,42 @@ function sanitizeFilters(filters: any): any {
   return newFilters;
 }
 
-function updateJsonContext(prevContext: any, question: string) {
-  const MAX_HISTORY = 10;
+// function updateJsonContext(prevContext: any, question: string) {
+//   const MAX_HISTORY = 10;
 
-  const ctx = { ...(prevContext || {}) };
+//   const ctx = { ...(prevContext || {}) };
 
-  // Maintain history
-  ctx.history = Array.isArray(ctx.history) ? ctx.history : [];
-  ctx.history.push(question);
-  if (ctx.history.length > MAX_HISTORY) ctx.history.shift();
+//   // Maintain history
+//   ctx.history = Array.isArray(ctx.history) ? ctx.history : [];
+//   ctx.history.push(question);
+//   if (ctx.history.length > MAX_HISTORY) ctx.history.shift();
 
-  // Simple keyword extraction
-  const words = question
-    .toLowerCase()
-    .replace(/[^\w\s]/g, "")
-    .split(" ")
-    .filter((w) => w.length > 3);
+//   // Simple keyword extraction
+//   const words = question
+//     .toLowerCase()
+//     .replace(/[^\w\s]/g, "")
+//     .split(" ")
+//     .filter((w) => w.length > 3);
 
-  ctx.keywords = [...new Set([...(ctx.keywords || []), ...words])];
+//   ctx.keywords = [...new Set([...(ctx.keywords || []), ...words])];
 
-  ctx.lastQuestion = question;
+//   ctx.lastQuestion = question;
 
-  return ctx;
+//   return ctx;
+// }
+
+function normalizeNumbers(obj: any) {
+  if (!obj || typeof obj !== "object") return;
+
+  for (const k in obj) {
+    const v = obj[k];
+    if (typeof v === "string") {
+      const n = parseInt(v);
+      if (!isNaN(n)) obj[k] = n;
+    }
+    if (typeof v === "object") normalizeNumbers(v);
+  }
 }
-
-
 async function searchRealtime(
   strapi: any,
   plan: any,
@@ -2340,7 +2379,8 @@ async function searchRealtime(
     return null;
   }
 
-  const sanitizedFilters = sanitizeFilters(plan.filters || {});
+const sanitizedFilters = sanitizeFilters(plan.filters || {});
+normalizeNumbers(sanitizedFilters);
   console.log(" SANITIZED FILTERS:", JSON.stringify(sanitizedFilters, null, 2));
 
   const config = activeCollections.find(
@@ -2434,7 +2474,8 @@ async function searchFAQ(question: string, strapi: any) {
 
 async function simplePlanner(
   question: string,
-  activeCollections: any[]
+  activeCollections: any[],
+  context: any
 ) {
   console.log("🧠 AI PLANNER QUESTION:", question);
 
@@ -2586,6 +2627,13 @@ Otherwise return:
   "sort": []
 }
 
+--------------------------------
+USER CONTEXT MEMORY
+--------------------------------
+${JSON.stringify(context)}
+
+If user message is incomplete,
+use context slots to complete filters.
 
 --------------------------------
 AVAILABLE COLLECTIONS
@@ -2737,14 +2785,30 @@ ${realtimeText}
   return response.choices[0].message.content;
 }
 
-
+function mergeContext(prev: any, next: any) {
+  return {
+    intent: next.intent ?? prev.intent ?? null,
+    slots: {
+      ...(prev.slots || {}),
+      ...(next.slots || {})
+    }
+  };
+}
 export default ({ strapi }: { strapi: any }) => ({
   async ask(ctx: any) {
     const { question, history = [] } = ctx.request.body;
 
-    let jsonContext = ctx.request.body.context || {};
-jsonContext = updateJsonContext(jsonContext, question);
-console.log(" JSON CONTEXT:", JSON.stringify(jsonContext, null, 2));
+let jsonContext = ctx.request.body.context || {};
+const aiResult = await rephraseAndExtract(
+  history,
+  question,
+  jsonContext
+);
+jsonContext = mergeContext(jsonContext, {
+  intent: aiResult.intent,
+  slots: aiResult.slots
+});
+console.log("JSON CONTEXT:", JSON.stringify(jsonContext, null, 2)); // 🔴 ADD THIS
 
 ctx.set("X-User-Context", JSON.stringify(jsonContext));
     console.log("QUESTION:", question);
@@ -2756,15 +2820,15 @@ ctx.set("X-User-Context", JSON.stringify(jsonContext));
     console.log("No active collections");
   }
 
-  const rewritten = await rephraseQuestion(history, question);
+const rewritten = aiResult.rewritten || question;
   console.log("🧠 REWRITTEN QUESTION:", rewritten);
 
   // FAQ
   const faqResults = await searchFAQ(rewritten, strapi);
-  console.log("📚 FAQ RESULTS:", JSON.stringify(faqResults, null, 2));
+  //console.log("📚 FAQ RESULTS:", JSON.stringify(faqResults, null, 2));
 
   // PLAN
-  const plan = await simplePlanner(rewritten, activeCollections);
+const plan = await simplePlanner(rewritten, activeCollections, jsonContext);
   console.log("📌 PLANNER RESULT:", JSON.stringify(plan, null, 2));
 
   // REALTIME
