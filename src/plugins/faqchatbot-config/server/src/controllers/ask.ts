@@ -2179,6 +2179,17 @@
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
+
+async function getContactLink(strapi: any) {
+  const pluginStore = strapi.store({
+    environment: null,
+    type: "plugin",
+    name: "faqchatbot-config",
+  });
+
+  const settings = await pluginStore.get({ key: "settings" });
+  return settings?.contactLink || null;
+}
 async function getActiveCollections(strapi: any) {
   try {
     console.log(" [DEBUG] Fetching active collections...");
@@ -2738,8 +2749,10 @@ async function finalAggregator(
   question: string,
   faq: any,
   realtimeMeta: any,
-  realtimeText: any
+  realtimeText: any, 
+  contactLink: string | null
 ) {
+  console.log(contactLink);
   console.log("AGG INPUT QUESTION:", question);
   console.log("AGG META:", JSON.stringify(realtimeMeta, null, 2));
   console.log("AGG TEXT:", realtimeText);
@@ -2760,10 +2773,33 @@ INPUTS:
 - User question
 
 --------------------------------
+RESPONSE LENGTH RULE
+--------------------------------
+Default → SHORT & PRECISE (2–3 lines max)
+
+If the user's question contains:
+"explain", "details", "more", "elaborate", "why", "how"
+→ Provide LONGER detailed answer.
+
+If FAQ answer is long:
+→ Summarize unless user asked for detail.
+
+--------------------------------
 CORE RULE
 --------------------------------
 REALTIME_META decides logic.
 REALTIME_TEXT decides wording.
+
+--------------------------------
+CONTACT INTENT RULE
+--------------------------------
+If user asks about contacting support, customer service, help, or similar:
+
+AND contactLink is provided:
+Return ONLY this link in a short sentence.
+
+Example:
+"You can contact us here: https://example.com/contact"
 
 --------------------------------
 ANSWER LOGIC
@@ -2793,6 +2829,9 @@ Max 5 lines.
         role: "user",
         content: `
 QUESTION: ${question}
+
+CONTACT_LINK:
+${contactLink || "NOT_AVAILABLE"}
 
 FAQ:
 ${JSON.stringify(faq)}
@@ -2832,6 +2871,9 @@ ctx.set("X-User-Context", JSON.stringify(jsonContext));
   const rewritten = await rephraseQuestion(history, question);
   console.log("🧠 REWRITTEN QUESTION:", rewritten);
 
+  const contactLink = await getContactLink(strapi);
+console.log("CONTACT LINK:", contactLink);
+
   // FAQ
   const faqResults = await searchFAQ(rewritten, strapi);
   console.log("📚 FAQ RESULTS:", JSON.stringify(faqResults, null, 2));
@@ -2863,7 +2905,8 @@ const finalAnswer = await finalAggregator(
   rewritten,
   faqResults,
   realtimeResults,   // meta
-  realtimeAIText     // text
+  realtimeAIText ,
+    contactLink    // text
 );
   console.log("🤖 FINAL ANSWER:", finalAnswer);
 

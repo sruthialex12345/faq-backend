@@ -58,5 +58,19 @@ export default () => ({
         auth: false,
       },
     },
+    {
+      method: "GET",
+      path: "/suggested-questions",
+      handler: "suggestQuestions.getSuggested",
+      config: {
+        auth: false,
+      },
+    },
+    {
+      method: "GET",
+      path: "/card-mapping",
+      handler: "cardMapping.index",
+      config: { auth: false },
+    },
   ],
 });

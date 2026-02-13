@@ -1,58 +1,66 @@
-// import type { Core } from '@strapi/strapi };
+
+
+
+// import type { Core } from '@strapi/strapi';
 
 // export default ({ strapi }: { strapi: Core.Strapi }) => ({
-//   // GET Settings
 //   async index(ctx: any) {
-//     // 1. Define the store (Global Scope: environment = null)
-//     const pluginStore = strapi.store({
-//       environment: null,
-//       type: 'plugin',
-//       name: 'faqchatbot-config',
-//     });
+//     const data = await strapi
+//       .plugin('faqchatbot-config')
+//       .service('config')
+//       .getConfig();
 
-//     // 2. Retrieve data
-//     const settings = await pluginStore.get({ key: 'collections' });
-
-//     // 3. Return (default to empty array if null)
-//     ctx.body = settings || [];
+//     ctx.body = data;
 //   },
 
-//   // SAVE Settings
 //   async update(ctx: any) {
-//     // 1. Get 'collections' from the request body
-//     // (My frontend code sends: { collections: [...] })
-//     const { collections } = ctx.request.body;
+//     // ✅ FRONTEND sends array directly, NOT { collections }
+//     const settings = ctx.request.body;
 
-//     // 2. Define the store (Global Scope: environment = null)
-//     const pluginStore = strapi.store({
-//       environment: null,
-//       type: 'plugin',
-//       name: 'faqchatbot-config',
-//     });
+//     console.log('🔥 CONTROLLER RECEIVED:', JSON.stringify(settings, null, 2));
 
-//     // 3. Save the data
-//     await pluginStore.set({ key: 'collections', value: collections });
-    
-//     // 4. Return success
-//     ctx.body = { ok: true };
+//     const data = await strapi
+//       .plugin('faqchatbot-config')
+//       .service('config')
+//       .setConfig(settings);
+
+//     console.log('✅ SAVED DATA:', JSON.stringify(data, null, 2));
+
+//     ctx.body = data;
 //   },
 // });
+
+
 
 
 import type { Core } from '@strapi/strapi';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
+
   async index(ctx: any) {
-    const data = await strapi
+    const settings = await strapi
       .plugin('faqchatbot-config')
       .service('config')
       .getConfig();
 
-    ctx.body = data;
+    // Detect all content types for admin UI
+    const contentTypes = Object.values(strapi.contentTypes)
+      .filter((ct: any) => ct.uid.startsWith('api::'))
+      .map((ct: any) => ({
+        uid: ct.uid,
+        displayName: ct.info.displayName,
+        attributes: Object.keys(ct.attributes).map((attr) => ({
+          name: attr
+        })),
+      }));
+
+    ctx.body = {
+      settings,
+      contentTypes,
+    };
   },
 
   async update(ctx: any) {
-    // ✅ FRONTEND sends array directly, NOT { collections }
     const settings = ctx.request.body;
 
     console.log('🔥 CONTROLLER RECEIVED:', JSON.stringify(settings, null, 2));
@@ -66,4 +74,5 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     ctx.body = data;
   },
+
 });

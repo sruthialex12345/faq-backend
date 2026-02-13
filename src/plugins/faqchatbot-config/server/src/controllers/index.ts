@@ -27,10 +27,14 @@
 import controller from "./controller";
 import config from "./config";
 import ask from "./ask";
+import suggestQuestions from "./suggestQuestions";
+import cardMapping from "./cardMapping";
 
 export default {
   controller,
   config,
   ask,
+  suggestQuestions,
+  cardMapping
 };
 

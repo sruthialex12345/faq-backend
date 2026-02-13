@@ -1,611 +1,14 @@
-
-// import React, { useEffect, useState } from 'react';
-// import {
-//   Main,
-//   Typography,
-//   Flex,
-//   Button,
-//   Box,
-//   Checkbox,
-//   Loader,
-//   EmptyStateLayout,
-//   Divider,
-//   Accordion,
-//   TextInput,
-//   Grid,
-//   Alert,
-// } from '@strapi/design-system';
-// import { Check, File, Key, Plus } from '@strapi/icons';
-
-// // @ts-ignore
-// import { useFetchClient, useNotification } from '@strapi/admin/strapi-admin';
-
-// type FieldConfig = {
-//   name: string;
-//   enabled: boolean;
-// };
-
-// type CollectionConfig = {
-//   name: string;
-//   fields: FieldConfig[];
-// };
-
-// type CheckboxValue = boolean | 'indeterminate';
-
-// const HomePage = () => {
-//   const [items, setItems] = useState<CollectionConfig[]>([]);
-//   const [openaiKey, setOpenaiKey] = useState('');
-//   const [isApiVisible, setIsApiVisible] = useState(false);
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [isSaving, setIsSaving] = useState(false);
-
-//   const { get, post } = useFetchClient();
-//   const { toggleNotification } = useNotification();
-
-//   useEffect(() => {
-//     const init = async () => {
-//       try {
-//         // Fetching both collections and existing config
-//         const { data } = await get('/faqchatbot-config/collections');
-//         // Assuming the endpoint returns an object with items and potentially the key
-//         // Adjust if your GET endpoint structure is different
-//         if (data.items && Array.isArray(data.items)) {
-//           setItems(data.items);
-//         } else if (Array.isArray(data)) {
-//           setItems(data);
-//         }
-        
-//         if (data.openaiKey) setOpenaiKey(data.openaiKey);
-
-//       } catch {
-//         toggleNotification({
-//           type: 'warning',
-//           message: 'Error loading configuration.',
-//         });
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
-//     init();
-//   }, [get, toggleNotification]);
-
-//   const toggleField = (collectionName: string, fieldName: string) => {
-//     setItems((prev) =>
-//       prev.map((c) => {
-//         if (c.name !== collectionName) return c;
-//         return {
-//           ...c,
-//           fields: c.fields.map((f) =>
-//             f.name === fieldName ? { ...f, enabled: !f.enabled } : f
-//           ),
-//         };
-//       })
-//     );
-//   };
-
-//   const toggleAllFields = (collectionName: string, value: boolean) => {
-//     setItems((prev) =>
-//       prev.map((c) => {
-//         if (c.name !== collectionName) return c;
-//         return {
-//           ...c,
-//           fields: c.fields.map((f) => ({ ...f, enabled: value })),
-//         };
-//       })
-//     );
-//   };
-
-//   const save = async () => {
-//     setIsSaving(true);
-//     try {
-//       await post('/faqchatbot-config/collections', {
-//         items,
-//         openaiKey,
-//       });
-//       toggleNotification({
-//         type: 'success',
-//         message: 'Settings saved successfully!',
-//       });
-//       setIsApiVisible(false);
-//     } catch {
-//       toggleNotification({
-//         type: 'warning',
-//         message: 'Error saving settings.',
-//       });
-//     } finally {
-//       setIsSaving(false);
-//     }
-//   };
-
-//   if (isLoading) {
-//     return (
-//       <Flex justifyContent="center" alignItems="center" height="100vh">
-//         <Loader>Loading configuration...</Loader>
-//       </Flex>
-//     );
-//   }
-  
-
-//   return (
-//     <Main>
-//       {/* HEADER */}
-//       <Box background="neutral100" padding={8} paddingBottom={6}>
-//         <Flex justifyContent="space-between" alignItems="center">
-//           <Box>
-//             <Typography variant="beta" fontWeight="bold">
-//               Realtime Configuration
-//             </Typography>
-//             <Typography variant="epsilon" textColor="neutral600">
-//                Manage your AI search settings and API keys.
-//             </Typography>
-//           </Box>
-
-//           <Button onClick={save} loading={isSaving} startIcon={<Check />}>
-//             Save Settings
-//           </Button>
-//         </Flex>
-//       </Box>
-
-//       {/* BODY */}
-//       <Box paddingLeft={8} paddingRight={8} paddingTop={0} background="neutral100">
-        
-//         {/* API CONFIGURATION BOX */}
-//         <Box background="neutral0" shadow="filterShadow" hasRadius padding={6} marginBottom={6}>
-//             <Flex justifyContent="space-between" alignItems="center">
-//                 <Box>
-//                     <Typography variant="delta" fontWeight="bold">API Configuration</Typography>
-//                     <Typography variant="pi" textColor="neutral600" display="block">
-//                         Configure your OpenAI credentials.
-//                     </Typography>
-//                 </Box>
-//                 <Button
-//                     variant="tertiary"
-//                     startIcon={openaiKey ? <Key /> : <Plus />}
-//                     onClick={() => setIsApiVisible(!isApiVisible)}
-//                 >
-//                     {openaiKey ? 'Change API Key' : 'Add API Key'}
-//                 </Button>
-//             </Flex>
-
-//             {isApiVisible && (
-//                 <Box paddingTop={4} style={{ borderTop: '1px solid #f0f0f5', marginTop: '16px' }}>
-//                     <Grid.Root gap={4}>
-//                         <Grid.Item col={6} s={12}>
-//                             <TextInput
-//                                 placeholder="sk-..."
-//                                 label="OpenAI API Key"
-//                                 name="openaiKey"
-//                                 hint="Stored securely in your database."
-//                                 type="password"
-//                                 value={openaiKey}
-//                                 onChange={(e: any) => setOpenaiKey(e.target.value)}
-//                             />
-//                         </Grid.Item>
-//                     </Grid.Root>
-//                 </Box>
-//             )}
-//         </Box>
-
-//         {items.length === 0 ? (
-//           <EmptyStateLayout
-//             icon={<File width="6rem" height="6rem" />}
-//             content="No collections found."
-//           />
-//         ) : (
-//           <Box background="neutral0" shadow="filterShadow" hasRadius marginBottom={10}>
-//             {/* SECTION TITLE */}
-//             <Box padding={6} paddingBottom={0}>
-//               <Typography variant="delta" fontWeight="bold">
-//                 Permissions
-//               </Typography>
-//               <Box paddingTop={1} paddingBottom={3}>
-//                 <Typography variant="pi" textColor="neutral600">
-//                   Select the fields you want to expose to AI.
-//                 </Typography>
-//               </Box>
-//             </Box>
-
-//             {/* ACCORDION */}
-//             <Accordion.Root type="multiple">
-//               {items.map((c) => {
-//                 const allChecked = c.fields.every((f) => f.enabled);
-//                 const someChecked = c.fields.some((f) => f.enabled);
-
-//                 return (
-//                   <Accordion.Item key={c.name} value={c.name}>
-//                     <Accordion.Header>
-//                       <Accordion.Trigger>
-//                         <Box paddingLeft={2} textAlign="left">
-//                           <Typography variant="delta" fontWeight="bold" display="block">
-//                             {c.name}
-//                           </Typography>
-//                           <Typography variant="pi" textColor="neutral600" display="block">
-//                             Define all allowed fields for the {c.name} content type.
-//                           </Typography>
-//                         </Box>
-//                       </Accordion.Trigger>
-//                     </Accordion.Header>
-
-//                     <Accordion.Content>
-//                       <Box background="neutral100" padding={4}>
-//                         <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
-//                           <Typography variant="sigma" textColor="neutral600">
-//                             {c.name.toUpperCase()}
-//                           </Typography>
-
-//                           <Checkbox
-//                             checked={allChecked}
-//                             indeterminate={!allChecked && someChecked}
-//                             onCheckedChange={(value: CheckboxValue) =>
-//                               toggleAllFields(c.name, value === true)
-//                             }
-//                           >
-//                             Select all
-//                           </Checkbox>
-//                         </Flex>
-
-//                         <Divider marginBottom={3} />
-
-//                         {/* FIELDS GRID - COMPACT STYLE */}
-//                         <Box paddingTop={2}>
-//                           <Flex gap={4} wrap="wrap" alignItems="center">
-//                             {c.fields.map((f) => (
-//                               <Box 
-//                                 key={f.name} 
-//                                 paddingRight={4} 
-//                                 paddingBottom={2}
-//                                 style={{ minWidth: '150px', flex: '0 0 auto' }}
-//                               >
-//                                 <Flex alignItems="center" gap={2}>
-//                                   <Checkbox
-//                                     checked={f.enabled}
-//                                     onCheckedChange={() => toggleField(c.name, f.name)}
-//                                   />
-//                                   <Typography variant="omega" textColor="neutral800">
-//                                     {f.name}
-//                                   </Typography>
-//                                 </Flex>
-//                               </Box>
-//                             ))}
-//                           </Flex>
-//                         </Box>
-//                       </Box>
-//                     </Accordion.Content>
-//                   </Accordion.Item>
-//                 );
-//               })}
-//             </Accordion.Root>
-//           </Box>
-//         )}
-//       </Box>
-//     </Main>
-//   );
-// };
-
-// export { HomePage };
-// import React, { useEffect, useState } from 'react';
-// import {
-//   Main,
-//   Typography,
-//   Flex,
-//   Button,
-//   Box,
-//   Checkbox,
-//   Loader,
-//   EmptyStateLayout,
-//   Divider,
-//   Accordion,
-//   TextInput,
-//   Grid,
-// } from '@strapi/design-system';
-// import { Check, File, Key, Plus } from '@strapi/icons';
-
-// // @ts-ignore
-// import { useFetchClient, useNotification } from '@strapi/admin/strapi-admin';
-
-// type FieldConfig = {
-//   name: string;
-//   enabled: boolean;
-// };
-
-// type CollectionConfig = {
-//   name: string;
-//   fields: FieldConfig[];
-//   isPlugin?: boolean; // Keep this for grouping logic
-// };
-
-// type CheckboxValue = boolean | 'indeterminate';
-
-// const HomePage = () => {
-//   const [items, setItems] = useState<CollectionConfig[]>([]);
-//   const [openaiKey, setOpenaiKey] = useState('');
-//   const [isApiVisible, setIsApiVisible] = useState(false);
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [isSaving, setIsSaving] = useState(false);
-
-//   const { get, post } = useFetchClient();
-//   const { toggleNotification } = useNotification();
-
-//   useEffect(() => {
-//     const init = async () => {
-//       try {
-//         const { data } = await get('/faqchatbot-config/collections');
-        
-//         // Handle both possible data structures from your endpoint
-//         if (data.items && Array.isArray(data.items)) {
-//           setItems(data.items);
-//         } else if (Array.isArray(data)) {
-//           setItems(data);
-//         }
-        
-//         if (data.openaiKey) setOpenaiKey(data.openaiKey);
-//       } catch {
-//         toggleNotification({
-//           type: 'warning',
-//           message: 'Error loading configuration.',
-//         });
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
-//     init();
-//   }, [get, toggleNotification]);
-
-//   const toggleField = (collectionName: string, fieldName: string) => {
-//     setItems((prev) =>
-//       prev.map((c) => {
-//         if (c.name !== collectionName) return c;
-//         return {
-//           ...c,
-//           fields: c.fields.map((f) =>
-//             f.name === fieldName ? { ...f, enabled: !f.enabled } : f
-//           ),
-//         };
-//       })
-//     );
-//   };
-
-//   const toggleAllFields = (collectionName: string, value: boolean) => {
-//     setItems((prev) =>
-//       prev.map((c) => {
-//         if (c.name !== collectionName) return c;
-//         return {
-//           ...c,
-//           fields: c.fields.map((f) => ({ ...f, enabled: value })),
-//         };
-//       })
-//     );
-//   };
-
-//   const save = async () => {
-//     setIsSaving(true);
-//     try {
-//       await post('/faqchatbot-config/collections', {
-//         items,
-//         openaiKey,
-//       });
-//       toggleNotification({
-//         type: 'success',
-//         message: 'Settings saved successfully!',
-//       });
-//       setIsApiVisible(false);
-//     } catch {
-//       toggleNotification({
-//         type: 'warning',
-//         message: 'Error saving settings.',
-//       });
-//     } finally {
-//       setIsSaving(false);
-//     }
-//   };
-
-//   if (isLoading) {
-//     return (
-//       <Flex justifyContent="center" alignItems="center" height="100vh">
-//         <Loader>Loading configuration...</Loader>
-//       </Flex>
-//     );
-//   }
-
-//   // ✅ SEPARATE API & PLUGIN COLLECTIONS
-//   const apiCollections = items.filter((c) => !c.isPlugin);
-//   const pluginCollections = items.filter((c) => c.isPlugin);
-
-//   const renderCollections = (list: CollectionConfig[]) => (
-//     <Accordion.Root type="multiple">
-//       {list.map((c) => {
-//         const allChecked = c.fields.every((f) => f.enabled);
-//         const someChecked = c.fields.some((f) => f.enabled);
-
-//         return (
-//           <Accordion.Item key={c.name} value={c.name}>
-//             <Accordion.Header>
-//               <Accordion.Trigger>
-//                 <Box paddingLeft={2} textAlign="left">
-//                   <Typography variant="delta" fontWeight="bold" display="block">
-//                     {c.name}
-//                   </Typography>
-//                   <Typography variant="pi" textColor="neutral600" display="block">
-//                     Define all allowed fields for the {c.name} content type.
-//                   </Typography>
-//                 </Box>
-//               </Accordion.Trigger>
-//             </Accordion.Header>
-
-//             <Accordion.Content>
-//               <Box background="neutral100" padding={4}>
-//                 <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
-//                   <Typography variant="sigma" textColor="neutral600">
-//                     {c.name.toUpperCase()}
-//                   </Typography>
-
-//                   <Checkbox
-//                     checked={allChecked}
-//                     indeterminate={!allChecked && someChecked}
-//                     onCheckedChange={(value: CheckboxValue) =>
-//                       toggleAllFields(c.name, value === true)
-//                     }
-//                   >
-//                     Select all
-//                   </Checkbox>
-//                 </Flex>
-
-//                 <Divider marginBottom={3} />
-
-//                 {/* FIELDS GRID - COMPACT MINIMIZED GAP */}
-//                 <Box paddingTop={2}>
-//                   <Flex gap={2} wrap="wrap" alignItems="center">
-//                     {c.fields.map((f) => (
-//                       <Box 
-//                         key={f.name} 
-//                         paddingRight={2} 
-//                         paddingBottom={2}
-//                         style={{ minWidth: '140px', flex: '0 0 auto' }}
-//                       >
-//                         <Flex alignItems="center" gap={2}>
-//                           <Checkbox
-//                             checked={f.enabled}
-//                             onCheckedChange={() => toggleField(c.name, f.name)}
-//                           />
-//                           <Typography variant="omega" textColor="neutral800">
-//                             {f.name}
-//                           </Typography>
-//                         </Flex>
-//                       </Box>
-//                     ))}
-//                   </Flex>
-//                 </Box>
-//               </Box>
-//             </Accordion.Content>
-//           </Accordion.Item>
-//         );
-//       })}
-//     </Accordion.Root>
-//   );
-
-//   return (
-//     <Main>
-//       {/* HEADER */}
-//       <Box background="neutral100" padding={8} paddingBottom={6}>
-//         <Flex justifyContent="space-between" alignItems="center">
-//           <Box>
-//             <Typography variant="beta" fontWeight="bold">
-//               Realtime Configuration
-//             </Typography>
-//             <Typography variant="epsilon" textColor="neutral600">
-//               Manage your AI search settings and API keys.
-//             </Typography>
-//           </Box>
-
-//           <Button onClick={save} loading={isSaving} startIcon={<Check />}>
-//             Save Settings
-//           </Button>
-//         </Flex>
-//       </Box>
-
-//       {/* BODY */}
-//       <Box paddingLeft={8} paddingRight={8} paddingTop={0} background="neutral100">
-        
-//         {/* API CONFIGURATION BOX */}
-//         <Box background="neutral0" shadow="filterShadow" hasRadius padding={6} marginBottom={6}>
-//           <Flex justifyContent="space-between" alignItems="center">
-//             <Box>
-//               <Typography variant="delta" fontWeight="bold">API Configuration</Typography>
-//               <Typography variant="pi" textColor="neutral600" display="block">
-//                 Configure your OpenAI credentials.
-//               </Typography>
-//             </Box>
-//             <Button
-//               variant="tertiary"
-//               startIcon={openaiKey ? <Key /> : <Plus />}
-//               onClick={() => setIsApiVisible(!isApiVisible)}
-//             >
-//               {openaiKey ? 'Change API Key' : 'Add API Key'}
-//             </Button>
-//           </Flex>
-
-//           {isApiVisible && (
-//             <Box paddingTop={4} style={{ borderTop: '1px solid #f0f0f5', marginTop: '16px' }}>
-//               <Grid.Root gap={4}>
-//                 <Grid.Item col={6} s={12}>
-//                   <TextInput
-//                     placeholder="sk-..."
-//                     label="OpenAI API Key"
-//                     name="openaiKey"
-//                     hint="Stored securely in your database."
-//                     type="password"
-//                     value={openaiKey}
-//                     onChange={(e: any) => setOpenaiKey(e.target.value)}
-//                   />
-//                 </Grid.Item>
-//               </Grid.Root>
-//             </Box>
-//           )}
-//         </Box>
-
-//         {items.length === 0 ? (
-//           <EmptyStateLayout
-//             icon={<File width="6rem" height="6rem" />}
-//             content="No collections found."
-//           />
-//         ) : (
-//           <Box background="neutral0" shadow="filterShadow" hasRadius marginBottom={10}>
-//             {/* CONTENT TYPES SECTION */}
-//             <Box padding={6} paddingBottom={2}>
-//               <Typography variant="delta" fontWeight="bold">
-//                 Content Types
-//               </Typography>
-//               <Typography variant="pi" textColor="neutral600" display="block">
-//                 Regular API collections.
-//               </Typography>
-//             </Box>
-
-//             {renderCollections(apiCollections)}
-
-//             {/* PLUGIN COLLECTIONS SECTION */}
-//             {pluginCollections.length > 0 && (
-//               <>
-//                 <Divider marginTop={4} />
-//                 <Box padding={6} paddingBottom={2}>
-//                   <Typography variant="delta" fontWeight="bold">
-//                     Chatbot FAQ
-//                   </Typography>
-//                   <Typography variant="pi" textColor="neutral600" display="block">
-//                     Plugin-based FAQ collections.
-//                   </Typography>
-//                 </Box>
-//                 {renderCollections(pluginCollections)}
-//               </>
-//             )}
-//           </Box>
-//         )}
-//       </Box>
-//     </Main>
-//   );
-// };
-
-// export { HomePage };
-
-
 import React, { useEffect, useState } from 'react';
-import {
-  Main,
-  Typography,
-  Flex,
-  Button,
-  Box,
-  Checkbox,
-  Loader,
-  EmptyStateLayout,
-  Divider,
-  Accordion,
-  TextInput,
-  Grid,
-} from '@strapi/design-system';
-import { Check, File, Key, Plus } from '@strapi/icons';
-
-
+import { Main, Typography, Flex, Button, Box, Loader } from '@strapi/design-system';
+import { Check } from '@strapi/icons';
 import { useFetchClient, useNotification } from '@strapi/admin/strapi-admin';
+
+import ChatbotPreview from '../components/ChatbotPreview';
+import ConfigSettings from '../components/ConfigSettings';
+import CollectionSection from '../components/CollectionSection';
+import SuggestedQuestions from '../components/SuggestedQuestions';
+import InstructionsSection from '../components/InstructionsSection';
+import PopUp from '../components/PopUp';
 
 type FieldConfig = {
   name: string;
@@ -613,269 +16,234 @@ type FieldConfig = {
 };
 
 type CollectionConfig = {
+  uid: string;
   name: string;
   fields: FieldConfig[];
-  isPlugin?: boolean;
+  cardStyle?: string;
 };
 
-type CheckboxValue = boolean | 'indeterminate';
-
 const HomePage = () => {
-  const [items, setItems] = useState<CollectionConfig[]>([]);
+  // Data States
+  const [allContentTypes, setAllContentTypes] = useState<CollectionConfig[]>([]);
+  const [activeCollections, setActiveCollections] = useState<CollectionConfig[]>([]);
+
+  // Settings States
   const [openaiKey, setOpenaiKey] = useState('');
-  const [isApiVisible, setIsApiVisible] = useState(false);
+  const [systemInstructions, setSystemInstructions] = useState('');
+  const [responseInstructions, setResponseInstructions] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [baseDomain, setBaseDomain] = useState('');
+  const [contactLink, setContactLink] = useState('');
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
+  const [cardOptions, setCardOptions] = useState<any[]>([]);
+
+
+  // UI States
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [activeModal, setActiveModal] = useState<'key' | 'logo' | 'domain' | 'contact' | 'collections' | 'suggestion' |  null>(null);
 
   const { get, post } = useFetchClient();
   const { toggleNotification } = useNotification();
+
 
   useEffect(() => {
     const init = async () => {
       try {
         const { data } = await get('/faqchatbot-config/collections');
+        const settings = data.settings || {};
+        const savedConfig = settings.config || {};
+        const savedStyles = settings.cardStyles || {}; // Added from friend's update
 
-        if (data.items && Array.isArray(data.items)) {
-          setItems(data.items);
-        } else if (Array.isArray(data)) {
-          setItems(data);
+        // Set Settings from Database
+        setOpenaiKey(settings.openaiKey || '');
+        setSystemInstructions(settings.systemInstructions || '');
+        setResponseInstructions(settings.responseInstructions || '');
+        setLogoUrl(settings.logoUrl || '');
+        setBaseDomain(settings.baseDomain || '');
+
+        if (settings.baseDomain) {
+          fetch(`${settings.baseDomain}/card-mapping.json`)
+            .then(res => res.json())
+            .then(setCardOptions)
+            .catch(() => setCardOptions([]));
         }
 
-        if (data.openaiKey) setOpenaiKey(data.openaiKey);
-      } catch {
-        toggleNotification({
-          type: 'warning',
-          message: 'Error loading configuration.',
-        });
+        setContactLink(settings.contactLink || '');
+        setSuggestedQuestions(settings.suggestedQuestions || []);
+
+        const formattedAll: CollectionConfig[] = (data.contentTypes || []).map((ct: any) => ({
+          uid: ct.uid,
+          name: ct.displayName,
+          cardStyle: savedStyles[ct.uid] || undefined, // Added from friend's update
+          fields: ct.attributes.map((attr: any) => ({
+            name: attr.name,
+            enabled: savedConfig[ct.uid]?.includes(attr.name) || false
+          }))
+        }));
+
+        setAllContentTypes(formattedAll);
+
+        // Set Active Collections
+        const initialActive = formattedAll.filter((ct: CollectionConfig) =>
+            Object.keys(savedConfig).includes(ct.uid)
+        );
+        setActiveCollections(initialActive);
+
+      } catch (err) {
+        toggleNotification({ type: 'warning', message: 'Error loading configuration.' });
       } finally {
         setIsLoading(false);
       }
     };
     init();
-  }, [get, toggleNotification]);
+  }, [get]);
 
-  const toggleField = (collectionName: string, fieldName: string) => {
-    setItems((prev) =>
-      prev.map((c) => {
-        if (c.name !== collectionName) return c;
-        return {
-          ...c,
-          fields: c.fields.map((f) =>
-            f.name === fieldName ? { ...f, enabled: !f.enabled } : f
-          ),
-        };
-      })
-    );
+
+  const handleUpdateCardStyle = (uid: string, style: string) => {
+    setActiveCollections((prev) => prev.map((c) =>
+      c.uid === uid ? { ...c, cardStyle: style } : c
+    ));
   };
 
-  const toggleAllFields = (collectionName: string, value: boolean) => {
-    setItems((prev) =>
-      prev.map((c) => {
-        if (c.name !== collectionName) return c;
-        return {
-          ...c,
-          fields: c.fields.map((f) => ({ ...f, enabled: value })),
-        };
-      })
-    );
+  const handleRemoveCollection = (uid: string) => {
+    setActiveCollections((prev) => prev.filter(c => c.uid !== uid));
   };
 
+  // --- Logic for Modals ---
+  const handlePopupSave = (data: any) => {
+    if (activeModal === 'collections') {
+      const selectedUids = data as string[];
+      setActiveCollections((currentActive) => {
+        const remaining = currentActive.filter(c => selectedUids.includes(c.uid));
+        const currentUids = currentActive.map(c => c.uid);
+        const newUids = selectedUids.filter(uid => !currentUids.includes(uid));
+        const newlyAdded = allContentTypes
+          .filter(ct => selectedUids.includes(ct.uid) && !currentUids.includes(ct.uid))
+          .map(ct => JSON.parse(JSON.stringify(ct)));
+        return [...remaining, ...newlyAdded];
+      });
+    }
+    else if (activeModal === 'suggestion') {
+      setSuggestedQuestions((prev) => {
+        const newList = [...prev];
+        if (editingQuestionIndex !== null) newList[editingQuestionIndex] = data;
+        else newList.push(data);
+        return newList;
+      });
+      setEditingQuestionIndex(null);
+    }
+    else if (activeModal === 'key') setOpenaiKey(data);
+    else if (activeModal === 'domain') setBaseDomain(data);
+    else if (activeModal === 'logo') setLogoUrl(data);
+    else if (activeModal === 'contact') setContactLink(data);
+
+    setActiveModal(null);
+  };
+
+  // Save Logic
   const save = async () => {
     setIsSaving(true);
     try {
+      const configToSave: Record<string, string[]> = {};
+      const stylesToSave: Record<string, string> = {}; // Added from friend's update
+
+      activeCollections.forEach(item => {
+        const enabled = item.fields.filter(f => f.enabled).map(f => f.name);
+        if (enabled.length > 0) configToSave[item.uid] = enabled;
+        if (item.cardStyle) stylesToSave[item.uid] = item.cardStyle; // Added from friend's update
+      });
+
       await post('/faqchatbot-config/collections', {
-        items,
-        openaiKey,
+        config: configToSave,
+        cardStyles: stylesToSave,
+        openaiKey, systemInstructions, responseInstructions,
+        logoUrl, baseDomain, contactLink, suggestedQuestions
       });
-      toggleNotification({
-        type: 'success',
-        message: 'Settings saved successfully!',
-      });
-      setIsApiVisible(false);
+
+      toggleNotification({ type: 'success', message: 'Settings saved successfully!' });
     } catch {
-      toggleNotification({
-        type: 'warning',
-        message: 'Error saving settings.',
-      });
+      toggleNotification({ type: 'warning', message: 'Error saving settings.' });
     } finally {
       setIsSaving(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <Flex justifyContent="center" alignItems="center" height="100vh">
-        <Loader>Loading configuration...</Loader>
-      </Flex>
-    );
-  }
-
-  // ✅ SPLIT COLLECTIONS
-  const apiCollections = items.filter((c) => !c.isPlugin);
-  const pluginCollections = items.filter((c) => c.isPlugin);
-
-  const renderCollections = (list: CollectionConfig[]) => (
-    <Accordion.Root type="multiple">
-      {list.map((c) => {
-        const allChecked = c.fields.every((f) => f.enabled);
-        const someChecked = c.fields.some((f) => f.enabled);
-
-        return (
-          <Accordion.Item key={c.name} value={c.name}>
-            <Accordion.Header>
-              <Accordion.Trigger>
-                <Box paddingLeft={2} textAlign="left">
-                  <Typography variant="delta" fontWeight="bold" display="block">
-                    {c.name}
-                  </Typography>
-                  <Typography variant="pi" textColor="neutral600">
-                    Define all allowed fields for the {c.name} content type.
-                  </Typography>
-                </Box>
-              </Accordion.Trigger>
-            </Accordion.Header>
-
-            <Accordion.Content>
-              <Box background="neutral100" padding={4}>
-                <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {c.name.toUpperCase()}
-                  </Typography>
-
-                  <Checkbox
-                    checked={allChecked}
-                    indeterminate={!allChecked && someChecked}
-                    onCheckedChange={(value: CheckboxValue) =>
-                      toggleAllFields(c.name, value === true)
-                    }
-                  >
-                    Select all
-                  </Checkbox>
-                </Flex>
-
-                <Divider marginBottom={3} />
-
-                {/* COMPACT FIELD LAYOUT */}
-                <Box paddingTop={2}>
-                  <Flex gap={2} wrap="wrap">
-                    {c.fields.map((f) => (
-                      <Box
-                        key={f.name}
-                        paddingRight={2}
-                        paddingBottom={1}
-                        style={{ minWidth: '140px' }}
-                      >
-                        <Flex alignItems="center" gap={2}>
-                          <Checkbox
-                            checked={f.enabled}
-                            onCheckedChange={() =>
-                              toggleField(c.name, f.name)
-                            }
-                          />
-                          <Typography variant="omega">
-                            {f.name}
-                          </Typography>
-                        </Flex>
-                      </Box>
-                    ))}
-                  </Flex>
-                </Box>
-              </Box>
-            </Accordion.Content>
-          </Accordion.Item>
-        );
-      })}
-    </Accordion.Root>
-  );
+  if (isLoading) return <Flex justifyContent="center" height="100vh"><Loader /></Flex>;
 
   return (
     <Main>
-      {/* HEADER */}
-      <Box background="neutral100" padding={8} paddingBottom={6}>
+      <Box background="neutral100" position="sticky" top={0} zIndex={2} padding={8} paddingBottom={6}>
         <Flex justifyContent="space-between" alignItems="center">
-          <Box>
-            <Typography variant="beta" fontWeight="bold">
-              Realtime Configuration
-            </Typography>
-            
-          </Box>
-
-          <Button onClick={save} loading={isSaving} startIcon={<Check />}>
-            Save Settings
-          </Button>
+          <Typography variant="beta" fontWeight="bold">Chatbot Configuration</Typography>
+          <Button onClick={save} loading={isSaving} startIcon={<Check />}>Save Settings</Button>
         </Flex>
       </Box>
 
-      {/* BODY */}
-      <Box paddingLeft={8} paddingRight={8} background="neutral100">
+      <Box paddingLeft={8} paddingTop={2} paddingRight={8} background="neutral100">
+        <ConfigSettings
+            baseDomain={baseDomain} openaiKey={openaiKey} logoUrl={logoUrl}
+            contactLink={contactLink} onManage={(type: any) => setActiveModal(type)}
+        />
 
-        {/* API CONFIGURATION BOX */}
-        <Box background="neutral0" shadow="filterShadow" hasRadius padding={6} marginBottom={6}>
-          <Flex justifyContent="space-between" alignItems="center">
-            <Box>
-              <Typography variant="delta" fontWeight="bold">
-                API Configuration
-              </Typography>
-             
-            </Box>
-            <Button
-              variant="tertiary"
-              startIcon={openaiKey ? <Key /> : <Plus />}
-              onClick={() => setIsApiVisible(!isApiVisible)}
-            >
-              {openaiKey ? 'Change API Key' : 'Add API Key'}
-            </Button>
-          </Flex>
+        <CollectionSection
+          collections={activeCollections}
+          cardOptions={cardOptions}
+          onToggleField={(uid, fName) => {
+            setActiveCollections(prev => prev.map(c => c.uid !== uid ? c : {
+              ...c, fields: c.fields.map((f: FieldConfig) => f.name === fName ? { ...f, enabled: !f.enabled } : f)
+            }));
+          }}
+          onToggleAll={(uid, val) => {
+            setActiveCollections(prev => prev.map(c => c.uid !== uid ? c : {
+              ...c, fields: c.fields.map((f: FieldConfig) => ({ ...f, enabled: val }))
+            }));
+          }}
+          onRemoveCollection={handleRemoveCollection}
+          onUpdateCardStyle={handleUpdateCardStyle}
+          onAddClick={() => setActiveModal('collections')}
+          isAddDisabled={allContentTypes.filter(c => c.uid !== 'plugin::faqchatbot-config.faqqa').length === activeCollections.length
+  }
+        />
 
-          {isApiVisible && (
-            <Box paddingTop={4} style={{ borderTop: '1px solid #f0f0f5', marginTop: '16px' }}>
-              <Grid.Root gap={4}>
-                <Grid.Item col={6} s={12}>
-                  <TextInput
-                    placeholder="sk-..."
-                    label="OpenAI API Key"
-                    name="openaiKey"
-                    type="password"
-                    value={openaiKey}
-                    onChange={(e: any) => setOpenaiKey(e.target.value)}
-                  />
-                </Grid.Item>
-              </Grid.Root>
-            </Box>
-          )}
-        </Box>
 
-        {/* COLLECTIONS BOX */}
-        <Box background="neutral0" shadow="filterShadow" hasRadius paddingBottom={4}>
-          <Box padding={6} paddingBottom={2}>
-            <Typography variant="delta" fontWeight="bold">
-              Collections
-            </Typography>
-          </Box>
+        <SuggestedQuestions
+          questions={suggestedQuestions}
+          onAddClick={() => { setEditingQuestionIndex(null); setActiveModal('suggestion'); }}
+          onEditClick={(index) => { setEditingQuestionIndex(index); setActiveModal('suggestion'); }}
+          onRemove={(index) => { setSuggestedQuestions(prev => prev.filter((_, i) => i !== index)); }}
+        />
 
-          {renderCollections(apiCollections)}
-        </Box>
 
-        {/* ✅ GAP LIKE STRAPI */}
-        <Box marginTop={6} />
 
-        {/* ✅ SEPARATE CHATBOT FAQ BOX */}
-        {pluginCollections.length > 0 && (
-          <Box background="neutral0" shadow="filterShadow" hasRadius paddingBottom={4}>
-            <Box padding={6} paddingBottom={2}>
-              <Typography variant="delta" fontWeight="bold">
-                Chatbot FAQ
-              </Typography>
-            
-            </Box>
-
-            {renderCollections(pluginCollections)}
-          </Box>
-        )}
+        <InstructionsSection
+          systemInstructions={systemInstructions}
+          responseInstructions={responseInstructions}
+          onUpdateSystem={setSystemInstructions}
+          onUpdateResponse={setResponseInstructions}
+        />
       </Box>
+
+      <PopUp
+        isOpen={!!activeModal} type={activeModal} onClose={() => setActiveModal(null)} onSave={handlePopupSave}
+
+        availableCollections={allContentTypes.filter(c =>
+          c.uid !== 'plugin::faqchatbot-config.faqqa' &&
+          !activeCollections.some(active => active.uid === c.uid)
+        )}
+        initialData={
+            activeModal === 'collections' ? activeCollections.map(c => c.uid) :
+            activeModal === 'suggestion' ? (editingQuestionIndex !== null ? suggestedQuestions[editingQuestionIndex] : ''):
+            activeModal === 'key' ? openaiKey :
+            activeModal === 'domain' ? baseDomain :
+            activeModal === 'logo' ? logoUrl : contactLink
+        }
+      />
+
+      <ChatbotPreview />
     </Main>
   );
 };
 
 export { HomePage };
-
