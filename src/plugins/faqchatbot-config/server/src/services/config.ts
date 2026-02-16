@@ -112,27 +112,42 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       type: 'plugin',
       name: 'faqchatbot-config',
     });
+      
 
     // Read full settings object
     const settings = await pluginStore.get({ key: 'settings' });
 
-    return settings || {};
+    return (settings && typeof settings === 'object') ? settings : {};
   },
 
-  async setConfig(settings: any) {
+  async setConfig(newSettings: any) {
     const pluginStore = strapi.store({
       environment: null,
       type: 'plugin',
       name: 'faqchatbot-config',
     });
+        const existingRaw = await pluginStore.get({ key: 'settings' });
 
+
+
+ const existingSettings =
+      (existingRaw && typeof existingRaw === 'object')
+        ? existingRaw
+        : {};
+
+    // Merge
+    const mergedSettings = {
+      ...existingSettings,
+      ...newSettings,
+    };
     // Save full settings object
+    // 3. Save merged object
     await pluginStore.set({
       key: 'settings',
-      value: settings,
+      value: mergedSettings,
     });
 
-    return settings;
+    return mergedSettings;
   },
 
 });

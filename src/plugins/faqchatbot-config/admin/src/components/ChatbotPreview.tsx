@@ -57,14 +57,38 @@ const ChatbotPreview = () => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, isOpen]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
-    setMessages(prev => [...prev, { text: chatInput, isUser: true }]);
+
+    const userText = chatInput;
+
+    setMessages(prev => [...prev, { text: userText, isUser: true }]);
     setChatInput('');
-    setTimeout(() => {
-      setMessages(prev => [...prev, { text: "Preview mode active.", isUser: false }]);
-    }, 800);
+
+    try {
+      const res = await fetch('/api/faqchatbot-config/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: userText
+        }),
+      });
+
+
+      const data = await res.json();
+
+      setMessages(prev => [
+        ...prev,
+        { text: data.content || 'No response', isUser: false },
+      ]);
+    } catch (err) {
+      setMessages(prev => [
+        ...prev,
+        { text: 'Error contacting chatbot', isUser: false },
+      ]);
+    }
   };
+
 
   const handleClearHistory = () => {
     setMessages([{ text: "Hello! You can test the chatbot preview here.", isUser: false }]);

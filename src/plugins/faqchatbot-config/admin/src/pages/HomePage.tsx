@@ -21,6 +21,22 @@ type CollectionConfig = {
   fields: FieldConfig[];
   cardStyle?: string;
 };
+function normalizeDomain(url: string): string {
+  if (!url) return "";
+
+  let normalized = url.trim().toLowerCase();
+
+  // Add protocol if missing
+  if (!normalized.startsWith("http://") && !normalized.startsWith("https://")) {
+    normalized = "https://" + normalized;
+  }
+
+  // Remove trailing slash
+  normalized = normalized.replace(/\/+$/, "");
+
+  return normalized;
+}
+
 
 const HomePage = () => {
   // Data States
@@ -48,7 +64,6 @@ const HomePage = () => {
   const { toggleNotification } = useNotification();
 
 
-  useEffect(() => {
     const init = async () => {
       try {
         const { data } = await get('/faqchatbot-config/collections');
@@ -61,10 +76,10 @@ const HomePage = () => {
         setSystemInstructions(settings.systemInstructions || '');
         setResponseInstructions(settings.responseInstructions || '');
         setLogoUrl(settings.logoUrl || '');
-        setBaseDomain(settings.baseDomain || '');
-
-        if (settings.baseDomain) {
-          fetch(`${settings.baseDomain}/card-mapping.json`)
+        const normalizedBase = normalizeDomain(settings.baseDomain || '');
+        setBaseDomain(normalizedBase);
+        if (normalizedBase) {
+        fetch(`${normalizedBase}/card-mapping.json`)
             .then(res => res.json())
             .then(setCardOptions)
             .catch(() => setCardOptions([]));
@@ -72,12 +87,27 @@ const HomePage = () => {
 
         setContactLink(settings.contactLink || '');
         setSuggestedQuestions(settings.suggestedQuestions || []);
+        
+
+        const SYSTEM_FIELDS = [
+          "createdAt",
+          "updatedAt",
+          "publishedAt",
+          "createdBy",
+          "updatedBy",
+          "locale",
+          "localizations",
+          "__component",
+          "id"
+        ];
 
         const formattedAll: CollectionConfig[] = (data.contentTypes || []).map((ct: any) => ({
           uid: ct.uid,
           name: ct.displayName,
           cardStyle: savedStyles[ct.uid] || undefined, // Added from friend's update
-          fields: ct.attributes.map((attr: any) => ({
+         fields: ct.attributes
+          .filter((attr: any) => !SYSTEM_FIELDS.includes(attr.name))
+          .map((attr: any) => ({
             name: attr.name,
             enabled: savedConfig[ct.uid]?.includes(attr.name) || false
           }))
@@ -97,8 +127,10 @@ const HomePage = () => {
         setIsLoading(false);
       }
     };
-    init();
-  }, [get]);
+    useEffect(() => {
+  init();
+}, [get]);
+    
 
 
   const handleUpdateCardStyle = (uid: string, style: string) => {
@@ -144,8 +176,33 @@ const HomePage = () => {
 
   // Save Logic
   const save = async () => {
+      if (!openaiKey || openaiKey.trim() === "") {
+    toggleNotification({
+      type: 'warning',
+      message: 'API Key not configured'
+    });
+    return;
+  }
     setIsSaving(true);
     try {
+      
+          // if (!openaiKey || openaiKey.length < 20 || !openaiKey.startsWith("sk-")) {
+          //   toggleNotification({ type: 'warning', message: 'Invalid OpenAI Key format' });
+          //   setIsSaving(false);
+          // return;
+          // }
+      //     const { data: keyCheck } = await post('/faqchatbot-config/validate-key', {
+      //     key: openaiKey
+      // });
+
+    // if (!keyCheck.valid) {
+    //   toggleNotification({ type: 'warning', message: 'OpenAI Key is invalid' });
+    //   setIsSaving(false);
+    //   return;
+    // }
+
+      const normalizedDomain = normalizeDomain(baseDomain);
+      setBaseDomain(normalizedDomain);
       const configToSave: Record<string, string[]> = {};
       const stylesToSave: Record<string, string> = {}; // Added from friend's update
 
@@ -159,10 +216,14 @@ const HomePage = () => {
         config: configToSave,
         cardStyles: stylesToSave,
         openaiKey, systemInstructions, responseInstructions,
-        logoUrl, baseDomain, contactLink, suggestedQuestions
-      });
+        logoUrl,
+        baseDomain: normalizedDomain,
+        contactLink,
+        suggestedQuestions
+    });
 
       toggleNotification({ type: 'success', message: 'Settings saved successfully!' });
+      await init();
     } catch {
       toggleNotification({ type: 'warning', message: 'Error saving settings.' });
     } finally {
@@ -177,7 +238,12 @@ const HomePage = () => {
       <Box background="neutral100" position="sticky" top={0} zIndex={2} padding={8} paddingBottom={6}>
         <Flex justifyContent="space-between" alignItems="center">
           <Typography variant="beta" fontWeight="bold">Chatbot Configuration</Typography>
-          <Button onClick={save} loading={isSaving} startIcon={<Check />}>Save Settings</Button>
+          <Button
+  onClick={save}
+  loading={isSaving}
+  startIcon={<Check />}
+  disabled={!openaiKey || openaiKey.trim() === ""}
+>Save Settings</Button>
         </Flex>
       </Box>
 

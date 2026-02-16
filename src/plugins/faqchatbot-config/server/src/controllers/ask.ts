@@ -2190,6 +2190,25 @@ async function getContactLink(strapi: any) {
   const settings = await pluginStore.get({ key: "settings" });
   return settings?.contactLink || null;
 }
+
+async function getInstructions(strapi: any) {
+  const pluginStore = strapi.store({
+    environment: null,
+    type: "plugin",
+    name: "faqchatbot-config",
+  });
+
+  const settings = await pluginStore.get({ key: "settings" });
+
+  return {
+    system: settings?.systemInstructions || "",
+    response: settings?.responseInstructions || "",
+  };
+}
+
+
+
+
 async function getActiveCollections(strapi: any) {
   try {
     console.log(" [DEBUG] Fetching active collections...");
@@ -2518,7 +2537,8 @@ async function searchFAQ(question: string, strapi: any) {
 
 async function simplePlanner(
   question: string,
-  activeCollections: any[]
+  activeCollections: any[],
+  instructions: { system: string }
 ) {
   console.log("🧠 AI PLANNER QUESTION:", question);
 
@@ -2529,6 +2549,7 @@ async function simplePlanner(
       {
         role: "system",
         content: `
+        ${instructions.system || ""}
 You are a STRICT database query planner that converts user questions into Strapi query JSON.
 
 --------------------------------
@@ -2750,12 +2771,14 @@ async function finalAggregator(
   faq: any,
   realtimeMeta: any,
   realtimeText: any, 
-  contactLink: string | null
+  contactLink: string | null,
+  instructions: { response: string }
 ) {
   console.log(contactLink);
   console.log("AGG INPUT QUESTION:", question);
   console.log("AGG META:", JSON.stringify(realtimeMeta, null, 2));
   console.log("AGG TEXT:", realtimeText);
+  console.log("resp inst before sending to prompt:", instructions.response);
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -2764,6 +2787,8 @@ async function finalAggregator(
       {
         role: "system",
         content: `
+
+        ${instructions.response || ""}
 You are an intelligent AI Assistant for a website chatbot.
 
 INPUTS:
@@ -2849,10 +2874,31 @@ ${realtimeText}
   return response.choices[0].message.content;
 }
 
+async function validateOpenAIKey(key: string) {
+  try {
+    const temp = new OpenAI({ apiKey: key });
+    await temp.models.list();
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export default ({ strapi }: { strapi: any }) => ({
+  async validateKey(ctx: any) {
+  const { key } = ctx.request.body;
+
+  const isValid = await validateOpenAIKey(key);
+
+  ctx.body = { valid: isValid };
+},
   async ask(ctx: any) {
     const { question, history = [] } = ctx.request.body;
+
+
+    const instructions = await getInstructions(strapi);
+      console.log("SYSTEM INSTRUCTIONS:", instructions.system);
+      console.log("RESPONSE INSTRUCTIONS:", instructions.response);
 
     let jsonContext = ctx.request.body.context || {};
 jsonContext = updateJsonContext(jsonContext, question);
@@ -2879,7 +2925,7 @@ console.log("CONTACT LINK:", contactLink);
   console.log("📚 FAQ RESULTS:", JSON.stringify(faqResults, null, 2));
 
   // PLAN
-  const plan = await simplePlanner(rewritten, activeCollections);
+  const plan = await simplePlanner(rewritten, activeCollections, instructions);
   console.log("📌 PLANNER RESULT:", JSON.stringify(plan, null, 2));
 
   // REALTIME
@@ -2906,7 +2952,9 @@ const finalAnswer = await finalAggregator(
   faqResults,
   realtimeResults,   // meta
   realtimeAIText ,
-    contactLink    // text
+    contactLink ,
+    instructions
+   // text
 );
   console.log("🤖 FINAL ANSWER:", finalAnswer);
 

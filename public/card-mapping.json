@@ -1,0 +1,5 @@
+[
+  { "id": "card1", "label": "Deal Card" },
+  { "id": "card2", "label": "Employee Card" },
+  { "id": "card3", "label": "Tour Card" }
+]
