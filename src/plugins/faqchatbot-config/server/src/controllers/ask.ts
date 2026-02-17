@@ -2767,22 +2767,30 @@ ${JSON.stringify(realtimeData)}
 }
 
 async function finalAggregator(
+ ctx: any,
   question: string,
   faq: any,
   realtimeMeta: any,
-  realtimeText: any, 
+  realtimeText: any,
   contactLink: string | null,
   instructions: { response: string }
-) {
+)  {
+  ctx.set("Content-Type", "text/event-stream");
+  ctx.set("Cache-Control", "no-cache");
+  ctx.set("Connection", "keep-alive");
+  ctx.status = 200;
+  ctx.res.flushHeaders?.();
+
   console.log(contactLink);
   console.log("AGG INPUT QUESTION:", question);
   console.log("AGG META:", JSON.stringify(realtimeMeta, null, 2));
   console.log("AGG TEXT:", realtimeText);
   console.log("resp inst before sending to prompt:", instructions.response);
 
-  const response = await openai.chat.completions.create({
+  const stream = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     temperature: 0.3,
+    stream: true,
     messages: [
       {
         role: "system",
@@ -2871,7 +2879,25 @@ ${realtimeText}
     ]
   });
 
-  return response.choices[0].message.content;
+    for await (const chunk of stream) {
+    const token = chunk.choices?.[0]?.delta?.content;
+    if (token) {
+      ctx.res.write(`data: ${token}\n\n`);
+    }
+  }
+    if (realtimeMeta && realtimeMeta.type === "list") {
+    const cardsPayload = {
+      title: realtimeMeta.collection,
+      schema: realtimeMeta.schema,
+      items: realtimeMeta.items,
+    };
+      ctx.res.write(`event: cards\n`);
+    ctx.res.write(`data: ${JSON.stringify(cardsPayload)}\n\n`);
+  }
+
+  ctx.res.write("data: [DONE]\n\n");
+  ctx.res.end();
+
 }
 
 async function validateOpenAIKey(key: string) {
@@ -2946,32 +2972,17 @@ if (plan && plan.collection) {
 }
 
 
-  // FINAL AI
-const finalAnswer = await finalAggregator(
+await finalAggregator(
+  ctx,
   rewritten,
   faqResults,
-  realtimeResults,   // meta
-  realtimeAIText ,
-    contactLink ,
-    instructions
-   // text
+  realtimeResults,
+  realtimeAIText,
+  contactLink,
+  instructions
 );
-  console.log("🤖 FINAL ANSWER:", finalAnswer);
 
-if (realtimeResults && realtimeResults.type === "list") {
-  ctx.body = {
-    type: "text+collection",
-    content: finalAnswer,
-    title: realtimeResults.collection,
-    schema: realtimeResults.schema,
-    items: realtimeResults.items,
-  };
-} else {
-  ctx.body = {
-    type: "text",
-    content: finalAnswer,
-  };
-}
+return;
 
 } catch (err) {
   console.error("[ERROR]", err);
