@@ -2176,9 +2176,27 @@
  import OpenAI from "openai";
 
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+
+
+async function getOpenAI(strapi: any) {
+  const pluginStore = strapi.store({
+    environment: null,
+    type: "plugin",
+    name: "faqchatbot-config",
+  });
+
+  const settings = await pluginStore.get({ key: "settings" });
+
+  const key = settings?.openaiKey;
+
+  if (!key) {
+    throw new Error("OpenAI key not configured in plugin settings");
+  }
+
+  return new OpenAI({ apiKey: key });
+}
+
+
 
 async function getContactLink(strapi: any) {
   const pluginStore = strapi.store({
@@ -2263,12 +2281,18 @@ if (!hasEnabledFields || ignored.includes(name)) {
   }
 }
 
-async function rephraseQuestion(history: any[], question: string) {
+async function rephraseQuestion(
+  strapi: any,
+  history: any[],
+  question: string
+) {
   if (!history || !Array.isArray(history) || history.length === 0) {
     console.log("REWRITE: skipped (no history)");
     return question;
   }
   try {
+    const openai = await getOpenAI(strapi);
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0,
@@ -2465,6 +2489,8 @@ async function searchFAQ(question: string, strapi: any) {
   console.log("FAQ SEARCH:", question);
 
   // 1. Create embedding
+  const openai = await getOpenAI(strapi);
+
   const embedding = await openai.embeddings.create({
     model: "text-embedding-3-small",
     input: question,
@@ -2536,11 +2562,13 @@ async function searchFAQ(question: string, strapi: any) {
 }
 
 async function simplePlanner(
+  strapi: any,
   question: string,
   activeCollections: any[],
   instructions: { system: string }
 ) {
   console.log("🧠 AI PLANNER QUESTION:", question);
+  const openai = await getOpenAI(strapi);
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -2724,10 +2752,11 @@ ${JSON.stringify(activeCollections, null, 2)}
   }
 }
 
-async function realtimeInterpreterAI(question: string, realtimeData: any) {
+async function realtimeInterpreterAI(strapi: any, question: string, realtimeData: any) {
   if (!realtimeData) return null;
 
   console.log("🧩 REALTIME AI INPUT:", JSON.stringify(realtimeData, null, 2));
+  const openai = await getOpenAI(strapi);
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -2767,6 +2796,7 @@ ${JSON.stringify(realtimeData)}
 }
 
 async function finalAggregator(
+  strapi: any,
  ctx: any,
   question: string,
   faq: any,
@@ -2786,6 +2816,7 @@ async function finalAggregator(
   console.log("AGG META:", JSON.stringify(realtimeMeta, null, 2));
   console.log("AGG TEXT:", realtimeText);
   console.log("resp inst before sending to prompt:", instructions.response);
+  const openai = await getOpenAI(strapi);
 
   const stream = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -2940,7 +2971,7 @@ ctx.set("X-User-Context", JSON.stringify(jsonContext));
     console.log("No active collections");
   }
 
-  const rewritten = await rephraseQuestion(history, question);
+const rewritten = await rephraseQuestion(strapi, history, question);
   console.log("🧠 REWRITTEN QUESTION:", rewritten);
 
   const contactLink = await getContactLink(strapi);
@@ -2951,7 +2982,7 @@ console.log("CONTACT LINK:", contactLink);
   console.log("📚 FAQ RESULTS:", JSON.stringify(faqResults, null, 2));
 
   // PLAN
-  const plan = await simplePlanner(rewritten, activeCollections, instructions);
+  const plan = await simplePlanner(strapi,rewritten, activeCollections, instructions);
   console.log("📌 PLANNER RESULT:", JSON.stringify(plan, null, 2));
 
   // REALTIME
@@ -2964,6 +2995,7 @@ if (plan && plan.collection) {
   console.log("⚡ REALTIME RESULTS:", JSON.stringify(realtimeResults, null, 2));
 
   realtimeAIText = await realtimeInterpreterAI(
+    strapi,
     rewritten,
     realtimeResults
   );
@@ -2973,6 +3005,7 @@ if (plan && plan.collection) {
 
 
 await finalAggregator(
+  strapi,
   ctx,
   rewritten,
   faqResults,

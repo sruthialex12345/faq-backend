@@ -1,14 +1,35 @@
 import { Core } from '@strapi/strapi';
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+type PluginSettings = {
+  openaiKey?: string;
+  contactLink?: string;
+  systemInstructions?: string;
+  responseInstructions?: string;
+};
+
+async function getOpenAI(strapi: Core.Strapi) {
+  const pluginStore = strapi.store({
+    environment: null,
+    type: "plugin",
+    name: "faqchatbot-config",
+  });
+
+const settings = await pluginStore.get({ key: "settings" }) as PluginSettings;
+const key = settings?.openaiKey;
+
+  if (!key) return null;
+
+  return new OpenAI({ apiKey: key });
+}
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async generateEmbedding(text: string) {
     try {
-      if (!process.env.OPENAI_API_KEY) {
+      const openai = await getOpenAI(strapi);
+
+      if (!openai) {
+        strapi.log.warn("OpenAI key not configured");
         return null;
       }
 
