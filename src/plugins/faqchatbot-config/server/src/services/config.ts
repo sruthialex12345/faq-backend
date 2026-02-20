@@ -135,11 +135,40 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         ? existingRaw
         : {};
 
+
+      let rebuiltCollections: any[] = [];
+
+  if (newSettings.config) {
+    rebuiltCollections = Object.entries(newSettings.config)
+      .map(([uid, selectedFields]: any) => {
+        const contentType = strapi.contentTypes[uid];
+        if (!contentType) return null;
+
+        const allFields = Object.keys(contentType.attributes);
+
+        return {
+          name: uid.split('.')[1], // "api::flight.flight" -> "flight"
+          fields: allFields.map((field) => ({
+            name: field,
+            enabled: selectedFields.includes(field),
+          })),
+        };
+      })
+      .filter(Boolean);
+  }
+  
     // Merge
     const mergedSettings = {
       ...existingSettings,
       ...newSettings,
     };
+
+if (rebuiltCollections.length > 0) {
+  await pluginStore.set({
+    key: 'collections',
+    value: rebuiltCollections,
+  });
+}
     // Save full settings object
     // 3. Save merged object
     await pluginStore.set({

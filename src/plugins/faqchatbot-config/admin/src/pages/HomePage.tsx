@@ -224,9 +224,19 @@ const HomePage = () => {
 
       toggleNotification({ type: 'success', message: 'Settings saved successfully!' });
       await init();
-    } catch {
-      toggleNotification({ type: 'warning', message: 'Error saving settings.' });
-    } finally {
+   } catch (err: any) {
+  console.log("SAVE ERROR:", err);
+
+  const message =
+    err?.response?.data?.error ||
+    err?.response?.data?.message ||
+    "Invalid settings. Please check Base Domain.";
+
+  toggleNotification({
+    type: 'warning',
+    message,
+  });
+} finally {
       setIsSaving(false);
     }
   };

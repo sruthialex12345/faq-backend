@@ -68,13 +68,5 @@ export default () => ({
       handler: 'cardMapping.index',
       config: { auth: false },
     },
-    {
-      method: 'POST',
-      path: '/validate-key',
-      handler: 'ask.validateKey',
-      config: {
-        auth: false,
-      },
-    },
   ],
 });

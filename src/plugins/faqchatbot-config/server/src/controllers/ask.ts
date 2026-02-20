@@ -1,5 +1,3 @@
-
-
 // import OpenAI from "openai";
 // import type { ChatCompletionTool } from "openai/resources/chat/completions";
 // import { PassThrough } from "stream";
@@ -36,7 +34,6 @@
 //   console.log(`   - Skipping '${item.name}' (no enabled fields)`);
 //   continue;
 // }
-
 
 //       const uid = `api::${item.name}.${item.name}`;
 //       const contentType = strapi.contentTypes[uid];
@@ -112,7 +109,7 @@
 //         ### RULES
 //         1. **Dependency Check (The "Pronoun" Rule):**
 //            - ONLY combine with history if the new question contains **Pronouns** ("it", "that", "they") or is **Grammatically Incomplete** ("How much?", "Where do I buy?", "Is it refundable?").
-           
+
 //         2. **Independence Check (The "Specifics" Rule):**
 //            - If the user asks a complete question containing a **New Specific Noun** or **Scenario** (e.g., "Group of 7 people", "Booking for pets"), treat it as a **Standalone Query**.
 //            - **Do NOT** attach the previous topic to it.
@@ -154,7 +151,7 @@
 //     if (operators.includes(key) && !key.startsWith("$")) {
 //       newKey = `$${key}`;
 //     }
-    
+
 //     newFilters[newKey] = sanitizeFilters(filters[key]);
 //   }
 
@@ -203,7 +200,7 @@
 //   });
 //   const vector = embedding.data[0].embedding;
 //   const knex = strapi.db.connection;
-  
+
 //   const results = await knex("chatbot_config_faqqas")
 //     .select(
 //       "answer",
@@ -395,8 +392,8 @@
 // ### 4. Always Match Against Stored Strings
 // Filters must be designed to match the database strings.
 // You may use either:
-// - the city name part  
-// - or the airport code part  
+// - the city name part
+// - or the airport code part
 // whichever is more precise for the user's input.
 
 // Never output raw user input unless it matches the database format.
@@ -438,8 +435,6 @@
 //   },
 // });
 
-
-
 // import OpenAI from "openai";
 // import type { ChatCompletionTool } from "openai/resources/chat/completions";
 // import { PassThrough } from "stream";
@@ -470,7 +465,6 @@
 //   console.log(`   - Skipping '${item.name}' (no enabled fields)`);
 //   continue;
 // }
-
 
 //       const uid = `api::${item.name}.${item.name}`;
 //       const contentType = strapi.contentTypes[uid];
@@ -546,7 +540,7 @@
 //         ### RULES
 //         1. **Dependency Check (The "Pronoun" Rule):**
 //            - ONLY combine with history if the new question contains **Pronouns** ("it", "that", "they") or is **Grammatically Incomplete** ("How much?", "Where do I buy?", "Is it refundable?").
-           
+
 //         2. **Independence Check (The "Specifics" Rule):**
 //            - If the user asks a complete question containing a **New Specific Noun** or **Scenario** (e.g., "Group of 7 people", "Booking for pets"), treat it as a **Standalone Query**.
 //            - **Do NOT** attach the previous topic to it.
@@ -588,7 +582,7 @@
 //     if (operators.includes(key) && !key.startsWith("$")) {
 //       newKey = `$${key}`;
 //     }
-    
+
 //     newFilters[newKey] = sanitizeFilters(filters[key]);
 //   }
 
@@ -618,7 +612,6 @@
 
 //   return ctx;
 // }
-
 
 // async function handleRealtime(ctx: any, strapi: any, plan: any, activeCollections: any) {
 //   console.log(" REALTIME HANDLER");
@@ -652,7 +645,6 @@
 //   return true;
 // }
 
-
 // async function handleFAQ(ctx: any, question: string, strapi: any) {
 //   console.log("FAQ QUESTION:", question);
 //   const embedding = await openai.embeddings.create({
@@ -661,7 +653,7 @@
 //   });
 //   const vector = embedding.data[0].embedding;
 //   const knex = strapi.db.connection;
-  
+
 //   const results = await knex("chatbot_config_faqqas")
 //     .select(
 //       "answer",
@@ -691,13 +683,13 @@
 //     "X-Accel-Buffering": "no",
 //   });
 //   ctx.status = 200;
- 
+
 //   ctx.res.socket?.setNoDelay(true);
 //   const stream = new PassThrough();
 //   ctx.body = stream;
 //   const send = (data: any) => {
 //     stream.write(`data: ${JSON.stringify(data)}\n\n`);
-  
+
 //     (ctx.res as any).flush?.();
 //   };
 //   const completion = await openai.chat.completions.create({
@@ -740,7 +732,6 @@
 //   send({ type: "done" });
 //   stream.end();
 // }
-
 
 // export default ({ strapi }: { strapi: any }) => ({
 //   async ask(ctx: any) {
@@ -859,8 +850,8 @@
 // ### 4. Always Match Against Stored Strings
 // Filters must be designed to match the database strings.
 // You may use either:
-// - the city name part  
-// - or the airport code part  
+// - the city name part
+// - or the airport code part
 // whichever is more precise for the user's input.
 
 // Never output raw user input unless it matches the database format.
@@ -905,14 +896,8 @@
 //   },
 // });
 
-
-
-
-
-
 //now working
 // import OpenAI from "openai";
-
 
 // const openai = new OpenAI({
 //   apiKey: process.env.OPENAI_API_KEY!,
@@ -940,7 +925,6 @@
 //   console.log(`   - Skipping '${item.name}' (no enabled fields)`);
 //   continue;
 // }
-
 
 //       const uid = `api::${item.name}.${item.name}`;
 //       const contentType = strapi.contentTypes[uid];
@@ -990,7 +974,7 @@
 //         ### RULES
 //         1. **Dependency Check (The "Pronoun" Rule):**
 //            - ONLY combine with history if the new question contains **Pronouns** ("it", "that", "they") or is **Grammatically Incomplete** ("How much?", "Where do I buy?", "Is it refundable?").
-           
+
 //         2. **Independence Check (The "Specifics" Rule):**
 //            - If the user asks a complete question containing a **New Specific Noun** or **Scenario** (e.g., "Group of 7 people", "Booking for pets"), treat it as a **Standalone Query**.
 //            - **Do NOT** attach the previous topic to it.
@@ -1032,7 +1016,7 @@
 //     if (operators.includes(key) && !key.startsWith("$")) {
 //       newKey = `$${key}`;
 //     }
-    
+
 //     newFilters[newKey] = sanitizeFilters(filters[key]);
 //   }
 
@@ -1062,7 +1046,6 @@
 
 //   return ctx;
 // }
-
 
 // async function searchRealtime(
 //   strapi: any,
@@ -1129,8 +1112,6 @@
 //     return null;
 //   }
 // }
-
-
 
 // async function searchFAQ(question: string, strapi: any) {
 //   console.log("FAQ SEARCH:", question);
@@ -1275,7 +1256,6 @@
 //   "filters": {},
 //   "sort": []
 // }
-
 
 // --------------------------------
 // AVAILABLE COLLECTIONS
@@ -1457,7 +1437,6 @@
 //   return response.choices[0].message.content;
 // }
 
-
 // export default ({ strapi }: { strapi: any }) => ({
 //   async ask(ctx: any) {
 //     const { question, history = [] } = ctx.request.body;
@@ -1504,7 +1483,6 @@
 //   console.log("🟡 Planner chose FAQ path — realtime skipped");
 // }
 
-
 //   // FINAL AI
 // const finalAnswer = await finalAggregator(
 //   rewritten,
@@ -1525,12 +1503,8 @@
 //   },
 // });
 
-
-
-
 //tested
 // import OpenAI from "openai";
-
 
 // const openai = new OpenAI({
 //   apiKey: process.env.OPENAI_API_KEY!,
@@ -1558,7 +1532,6 @@
 //   console.log(`   - Skipping '${item.name}' (no enabled fields)`);
 //   continue;
 // }
-
 
 //       const uid = `api::${item.name}.${item.name}`;
 //       const contentType = strapi.contentTypes[uid];
@@ -1608,7 +1581,7 @@
 //         ### RULES
 //         1. **Dependency Check (The "Pronoun" Rule):**
 //            - ONLY combine with history if the new question contains **Pronouns** ("it", "that", "they") or is **Grammatically Incomplete** ("How much?", "Where do I buy?", "Is it refundable?").
-           
+
 //         2. **Independence Check (The "Specifics" Rule):**
 //            - If the user asks a complete question containing a **New Specific Noun** or **Scenario** (e.g., "Group of 7 people", "Booking for pets"), treat it as a **Standalone Query**.
 //            - **Do NOT** attach the previous topic to it.
@@ -1650,7 +1623,7 @@
 //     if (operators.includes(key) && !key.startsWith("$")) {
 //       newKey = `$${key}`;
 //     }
-    
+
 //     newFilters[newKey] = sanitizeFilters(filters[key]);
 //   }
 
@@ -1680,7 +1653,6 @@
 
 //   return ctx;
 // }
-
 
 // async function searchRealtime(
 //   strapi: any,
@@ -1747,8 +1719,6 @@
 //     return null;
 //   }
 // }
-
-
 
 // async function searchFAQ(question: string, strapi: any) {
 //   console.log("FAQ SEARCH:", question);
@@ -1818,7 +1788,6 @@
 // --------------------------------
 // - Only use fields that exist in the selected collection schema.
 // - Never hallucinate fields.
-
 
 // --------------------------------
 // LOCATION NORMALIZATION (CRITICAL)
@@ -1940,7 +1909,6 @@
 //   "filters": {},
 //   "sort": []
 // }
-
 
 // --------------------------------
 // AVAILABLE COLLECTIONS
@@ -2092,7 +2060,6 @@
 //   return response.choices[0].message.content;
 // }
 
-
 // export default ({ strapi }: { strapi: any }) => ({
 //   async ask(ctx: any) {
 //     const { question, history = [] } = ctx.request.body;
@@ -2139,7 +2106,6 @@
 //   console.log("🟡 Planner chose FAQ path — realtime skipped");
 // }
 
-
 //   // FINAL AI
 // const finalAnswer = await finalAggregator(
 //   rewritten,
@@ -2171,134 +2137,141 @@
 //   },
 // });
 
-
-
- import OpenAI from "openai";
-
-
-
+import OpenAI from 'openai';
 
 async function getOpenAI(strapi: any) {
   const pluginStore = strapi.store({
     environment: null,
-    type: "plugin",
-    name: "faqchatbot-config",
+    type: 'plugin',
+    name: 'faqchatbot-config',
   });
 
-  const settings = await pluginStore.get({ key: "settings" });
+  const settings = await pluginStore.get({ key: 'settings' });
 
   const key = settings?.openaiKey;
 
   if (!key) {
-    throw new Error("OpenAI key not configured in plugin settings");
+    throw new Error('OpenAI key not configured in plugin settings');
   }
 
   return new OpenAI({ apiKey: key });
 }
 
-
-
 async function getContactLink(strapi: any) {
   const pluginStore = strapi.store({
     environment: null,
-    type: "plugin",
-    name: "faqchatbot-config",
+    type: 'plugin',
+    name: 'faqchatbot-config',
   });
 
-  const settings = await pluginStore.get({ key: "settings" });
+  const settings = await pluginStore.get({ key: 'settings' });
   return settings?.contactLink || null;
 }
 
 async function getInstructions(strapi: any) {
   const pluginStore = strapi.store({
     environment: null,
-    type: "plugin",
-    name: "faqchatbot-config",
+    type: 'plugin',
+    name: 'faqchatbot-config',
   });
 
-  const settings = await pluginStore.get({ key: "settings" });
+  const settings = await pluginStore.get({ key: 'settings' });
 
   return {
-    system: settings?.systemInstructions || "",
-    response: settings?.responseInstructions || "",
+    system: settings?.systemInstructions || '',
+    response: settings?.responseInstructions || '',
   };
 }
 
-
-
-
 async function getActiveCollections(strapi: any) {
   try {
-    console.log(" [DEBUG] Fetching active collections...");
+    console.log(' [DEBUG] Fetching active collections...');
     const pluginStore = strapi.store({
       environment: null,
-      type: "plugin",
-      name: "faqchatbot-config",
+      type: 'plugin',
+      name: 'faqchatbot-config',
     });
-    const settings = await pluginStore.get({ key: "collections" });
-    console.log(" [DEBUG] Plugin settings fetched:", settings);
+    const settings = await pluginStore.get({ key: 'collections' });
+    console.log(' [DEBUG] Plugin settings fetched:', settings);
     if (!settings) return [];
 
     const activeList = [];
     for (const item of settings) {
-      const ignored = ["faqitem", "item"];
-      const name = item.name.toLowerCase();
 
-     const hasEnabledFields = item.fields?.some((f: any) => f.enabled);
+  const hasEnabledFields = item.fields?.some((f: any) => f.enabled);
 
-if (!hasEnabledFields || ignored.includes(name)) {
-  console.log(`   - Skipping '${item.name}' (no enabled fields)`);
-  continue;
+  if (!hasEnabledFields) {
+    console.log(`   - Skipping '${item.name}' (no enabled fields)`);
+    continue;
+  }
+
+  const uid = `api::${item.name}.${item.name}`;
+  const contentType = strapi.contentTypes[uid];
+
+  if (!contentType) {
+    console.warn(` [WARNING] Content type not found for UID: ${uid}`);
+    continue;
+  }
+
+  const enabledFields = item.fields
+    ?.filter((f: any) => f.enabled)
+    ?.map((f: any) => f.name)
+    ?.filter((fieldName: string) => {
+      const attr = contentType.attributes[fieldName];
+      return (
+        attr &&
+        [
+          'string',
+          'text',
+          'email',
+          'uid',
+          'richtext',
+          'enumeration',
+          'integer',
+          'biginteger',
+          'decimal',
+          'float',
+          'date',
+          'datetime',
+          'time',
+          'relation',
+        ].includes(attr.type)
+      );
+    });
+
+  if (!enabledFields || enabledFields.length === 0) continue;
+
+  activeList.push({
+    name: item.name,
+    fields: enabledFields,
+  });
+
+  console.log(`   + Adding '${item.name}' with fields:`, enabledFields);
 }
 
 
-      const uid = `api::${item.name}.${item.name}`;
-      const contentType = strapi.contentTypes[uid];
-
-      if (!contentType) {
-        console.warn(` [WARNING] Content type not found for UID: ${uid}`);
-        continue;
-      }
-
-      const fields = Object.keys(contentType.attributes).filter((key) => {
-        const attr = contentType.attributes[key];
-        return [
-          "string", "text", "email", "uid", "richtext", "enumeration",
-          "integer", "biginteger", "decimal", "float", "date", "datetime",
-          "time", "relation"
-        ].includes(attr.type);
-      });
-
-      console.log(`   + Adding '${item.name}' with fields:`, fields);
-      activeList.push({ name: item.name, fields: fields });
-    }
-
-    console.log(" [DEBUG] Final active collections:", activeList);
+    console.log(' [DEBUG] Final active collections:', activeList);
     return activeList;
   } catch (err) {
-    console.error(" [ERROR] Error loading active collections:", err);
+    console.error(' [ERROR] Error loading active collections:', err);
     return [];
   }
 }
 
-async function rephraseQuestion(
-  strapi: any,
-  history: any[],
-  question: string
-) {
+async function rephraseQuestion(strapi: any, history: any[], question: string) {
   if (!history || !Array.isArray(history) || history.length === 0) {
-    console.log("REWRITE: skipped (no history)");
+    console.log('REWRITE: skipped (no history)');
     return question;
   }
   try {
     const openai = await getOpenAI(strapi);
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: 'gpt-4o-mini',
       temperature: 0,
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: `You are a Search Query Optimizer.
         Your task is to determine if the user's new message is a **Follow-up** or a **New Topic** and if a follow-up just rewrite the question .
         Do NOT return any explanations, only the optimized search string.
@@ -2314,62 +2287,76 @@ async function rephraseQuestion(
            - *Bad Output:* "Group booking for Commuter Pass" (Incorrect).
 
         3. **Output:**
-           - Return ONLY the optimized search string.`
+           - Return ONLY the optimized search string.`,
         },
         ...history.slice(-4),
-        { role: "user", content: question },
+        { role: 'user', content: question },
       ],
     });
-const rewritten = response.choices[0].message.content?.trim();
-console.log(`REWRITE: "${question}" → "${rewritten}"`);
+    const rewritten = response.choices[0].message.content?.trim();
+    console.log(`REWRITE: "${question}" → "${rewritten}"`);
 
-if (!rewritten) return question;
+    if (!rewritten) return question;
 
-const lower = rewritten.toLowerCase();
+    const lower = rewritten.toLowerCase();
 
-// If model answered instead of rewriting → ignore
-if (
-  lower.includes("unavailable") ||
-  lower.includes("sorry") ||
-  lower.includes("i am") ||
-  lower.includes("cannot") ||
-  rewritten.length > 120
-) {
-  console.log("REWRITE REJECTED – using original question");
-  return question;
-}
+    // If model answered instead of rewriting → ignore
+    if (
+      lower.includes('unavailable') ||
+      lower.includes('sorry') ||
+      lower.includes('i am') ||
+      lower.includes('cannot') ||
+      rewritten.length > 120
+    ) {
+      console.log('REWRITE REJECTED – using original question');
+      return question;
+    }
 
-return rewritten;
-
-
+    return rewritten;
   } catch (err) {
-    console.error("Error in rephraseQuestion:", err);
+    console.error('Error in rephraseQuestion:', err);
     return question;
   }
-  
 }
 
 function sanitizeFilters(filters: any): any {
-  if (!filters || typeof filters !== "object") return filters;
+  if (!filters || typeof filters !== 'object') return filters;
 
   if (Array.isArray(filters)) {
     return filters.map(sanitizeFilters);
   }
 
   const operators = [
-    "eq", "ne", "lt", "gt", "lte", "gte", "in", "notIn", "contains",
-    "notContains", "containsi", "notContainsi", "null", "notNull",
-    "between", "startsWith", "endsWith", "or", "and", "not"
+    'eq',
+    'ne',
+    'lt',
+    'gt',
+    'lte',
+    'gte',
+    'in',
+    'notIn',
+    'contains',
+    'notContains',
+    'containsi',
+    'notContainsi',
+    'null',
+    'notNull',
+    'between',
+    'startsWith',
+    'endsWith',
+    'or',
+    'and',
+    'not',
   ];
 
   const newFilters: any = {};
 
   for (const key in filters) {
     let newKey = key;
-    if (operators.includes(key) && !key.startsWith("$")) {
+    if (operators.includes(key) && !key.startsWith('$')) {
       newKey = `$${key}`;
     }
-    
+
     newFilters[newKey] = sanitizeFilters(filters[key]);
   }
 
@@ -2389,8 +2376,8 @@ function updateJsonContext(prevContext: any, question: string) {
   // Simple keyword extraction
   const words = question
     .toLowerCase()
-    .replace(/[^\w\s]/g, "")
-    .split(" ")
+    .replace(/[^\w\s]/g, '')
+    .split(' ')
     .filter((w) => w.length > 3);
 
   ctx.keywords = [...new Set([...(ctx.keywords || []), ...words])];
@@ -2400,43 +2387,58 @@ function updateJsonContext(prevContext: any, question: string) {
   return ctx;
 }
 
+function extractFilterFields(filters: any, collected: Set<string> = new Set()) {
+  if (!filters || typeof filters !== 'object') return [];
 
-async function searchRealtime(
-  strapi: any,
-  plan: any,
-  activeCollections: any
-) {
-  console.log(" REALTIME SEARCH");
-  console.log(" PLAN:", JSON.stringify(plan, null, 2));
+  for (const key in filters) {
+    // Skip Strapi operators
+    if (key.startsWith('$')) {
+      extractFilterFields(filters[key], collected);
+    } else {
+      collected.add(key);
+      extractFilterFields(filters[key], collected);
+    }
+  }
+
+  return Array.from(collected);
+}
+
+async function searchRealtime(strapi: any, plan: any, activeCollections: any) {
+  console.log(' REALTIME SEARCH');
+  console.log(' PLAN:', JSON.stringify(plan, null, 2));
 
   if (!plan || !plan.collection) {
-    console.log("No collection in plan");
+    console.log('No collection in plan');
+    return null;
+  }
+  const config = activeCollections.find((c: any) => c.name === plan.collection);
+
+  if (!config) {
     return null;
   }
 
   const sanitizedFilters = sanitizeFilters(plan.filters || {});
-  console.log(" SANITIZED FILTERS:", JSON.stringify(sanitizedFilters, null, 2));
+  console.log(' SANITIZED FILTERS:', JSON.stringify(sanitizedFilters, null, 2));
+  const requestedFields = extractFilterFields(sanitizedFilters);
 
-  const config = activeCollections.find(
-    (c: any) => c.name === plan.collection
-  );
-
-  if (!config) {
-    console.log("Collection not active");
-    return null;
+  for (const field of requestedFields) {
+    if (!config.fields.includes(field)) {
+      console.log(`🚫 Blocked query: field '${field}' is disabled`);
+      return null;
+    }
   }
 
   const uid = `api::${plan.collection}.${plan.collection}`;
 
   try {
     // COUNT OPERATION
-    if (plan.operation === "count") {
+    if (plan.operation === 'count') {
       const count = await strapi.entityService.count(uid, {
         filters: sanitizedFilters,
       });
 
       return {
-        type: "count",
+        type: 'count',
         collection: plan.collection,
         value: count,
       };
@@ -2456,17 +2458,16 @@ async function searchRealtime(
     });
 
     return {
-      type: "list",
+      type: 'list',
       collection: plan.collection,
       schema: config.fields,
       items: cleaned,
     };
   } catch (err) {
-    console.error("Realtime search error:", err);
+    console.error('Realtime search error:', err);
     return null;
   }
 }
-
 
 function cosineSimilarity(a: number[], b: number[]) {
   if (!a || !b || a.length !== b.length) return 0;
@@ -2484,15 +2485,14 @@ function cosineSimilarity(a: number[], b: number[]) {
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-
 async function searchFAQ(question: string, strapi: any) {
-  console.log("FAQ SEARCH:", question);
+  console.log('FAQ SEARCH:', question);
 
   // 1. Create embedding
   const openai = await getOpenAI(strapi);
 
   const embedding = await openai.embeddings.create({
-    model: "text-embedding-3-small",
+    model: 'text-embedding-3-small',
     input: question,
   });
 
@@ -2502,17 +2502,17 @@ async function searchFAQ(question: string, strapi: any) {
   // queryVector = queryVector.slice(0, 1536);
 
   if (!queryVector || !queryVector.length) {
-    console.log("FAQ: Query embedding failed");
+    console.log('FAQ: Query embedding failed');
     return [];
   }
 
-  console.log("QUERY VECTOR LENGTH:", queryVector.length);
+  console.log('QUERY VECTOR LENGTH:', queryVector.length);
   // 2. Fetch all FAQ embeddings
   const faqs = await strapi.db
-    .connection("chatbot_config_faqqas")
-    .select("answer", "embedding")
-    .whereNotNull("embedding")
-    .whereNotNull("published_at");
+    .connection('chatbot_config_faqqas')
+    .select('answer', 'embedding')
+    .whereNotNull('embedding')
+    .whereNotNull('published_at');
 
   if (!faqs.length) return [];
 
@@ -2522,14 +2522,12 @@ async function searchFAQ(question: string, strapi: any) {
 
     try {
       // If stored as string JSON → parse
-      if (typeof dbVector === "string") {
+      if (typeof dbVector === 'string') {
         dbVector = JSON.parse(dbVector);
       }
 
       // Force all values to numbers
-      dbVector = Array.isArray(dbVector)
-        ? dbVector.map((n: any) => Number(n))
-        : [];
+      dbVector = Array.isArray(dbVector) ? dbVector.map((n: any) => Number(n)) : [];
 
       // Length mismatch guard
       if (!Array.isArray(dbVector) || dbVector.length !== queryVector.length) {
@@ -2541,7 +2539,7 @@ async function searchFAQ(question: string, strapi: any) {
         similarity: cosineSimilarity(queryVector, dbVector),
       };
     } catch (err) {
-      console.log("FAQ parse error:", err);
+      console.log('FAQ parse error:', err);
       return { answer: f.answer, similarity: 0 };
     }
   });
@@ -2549,11 +2547,11 @@ async function searchFAQ(question: string, strapi: any) {
   // 4. Sort by similarity
   scored.sort((a, b) => b.similarity - a.similarity);
 
-  console.log("TOP FAQ SIM:", scored[0]?.similarity);
+  console.log('TOP FAQ SIM:', scored[0]?.similarity);
 
   // 5. Threshold check
-  if (!scored.length || scored[0].similarity < 0.40) {
-    console.log("FAQ: No good match");
+  if (!scored.length || scored[0].similarity < 0.4) {
+    console.log('FAQ: No good match');
     return [];
   }
 
@@ -2567,17 +2565,17 @@ async function simplePlanner(
   activeCollections: any[],
   instructions: { system: string }
 ) {
-  console.log("🧠 AI PLANNER QUESTION:", question);
+  console.log('🧠 AI PLANNER QUESTION:', question);
   const openai = await getOpenAI(strapi);
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: 'gpt-4o-mini',
     temperature: 0,
     messages: [
       {
-        role: "system",
+        role: 'system',
         content: `
-        ${instructions.system || ""}
+        ${instructions.system || ''}
 You are a STRICT database query planner that converts user questions into Strapi query JSON.
 
 --------------------------------
@@ -2724,30 +2722,30 @@ Otherwise return:
 AVAILABLE COLLECTIONS
 --------------------------------
 ${JSON.stringify(activeCollections, null, 2)}
-`
+`,
       },
       {
-        role: "user",
-        content: question
-      }
-    ]
+        role: 'user',
+        content: question,
+      },
+    ],
   });
 
   try {
-    const raw = response.choices[0].message.content || "{}";
+    const raw = response.choices[0].message.content || '{}';
 
     // Safety cleanup in case model adds ```json
     const cleaned = raw
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
       .trim();
 
     const plan = JSON.parse(cleaned);
 
-    console.log("🧠 AI PLAN:", JSON.stringify(plan, null, 2));
+    console.log('🧠 AI PLAN:', JSON.stringify(plan, null, 2));
     return plan;
   } catch (err) {
-    console.log("❌ Planner JSON parse failed");
+    console.log('❌ Planner JSON parse failed');
     return null;
   }
 }
@@ -2755,15 +2753,15 @@ ${JSON.stringify(activeCollections, null, 2)}
 async function realtimeInterpreterAI(strapi: any, question: string, realtimeData: any) {
   if (!realtimeData) return null;
 
-  console.log("🧩 REALTIME AI INPUT:", JSON.stringify(realtimeData, null, 2));
+  console.log('🧩 REALTIME AI INPUT:', JSON.stringify(realtimeData, null, 2));
   const openai = await getOpenAI(strapi);
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: 'gpt-4o-mini',
     temperature: 0.2,
     messages: [
       {
-        role: "system",
+        role: 'system',
         content: `
 You are a realtime data interpreter.
 
@@ -2775,59 +2773,59 @@ Rules:
 - If count → say number
 - If list → summarize important fields only
 - Max 3–4 lines
-`
+`,
       },
       {
-        role: "user",
+        role: 'user',
         content: `
 QUESTION: ${question}
 
 REALTIME DATA:
 ${JSON.stringify(realtimeData)}
-`
-      }
-    ]
+`,
+      },
+    ],
   });
 
   const text = response.choices[0].message.content;
-  console.log("🧠 REALTIME AI OUTPUT:", text);
+  console.log('🧠 REALTIME AI OUTPUT:', text);
 
   return text;
 }
 
 async function finalAggregator(
   strapi: any,
- ctx: any,
+  ctx: any,
   question: string,
   faq: any,
   realtimeMeta: any,
   realtimeText: any,
   contactLink: string | null,
   instructions: { response: string }
-)  {
-  ctx.set("Content-Type", "text/event-stream");
-  ctx.set("Cache-Control", "no-cache");
-  ctx.set("Connection", "keep-alive");
+) {
+  ctx.set('Content-Type', 'text/event-stream');
+  ctx.set('Cache-Control', 'no-cache');
+  ctx.set('Connection', 'keep-alive');
   ctx.status = 200;
   ctx.res.flushHeaders?.();
 
   console.log(contactLink);
-  console.log("AGG INPUT QUESTION:", question);
-  console.log("AGG META:", JSON.stringify(realtimeMeta, null, 2));
-  console.log("AGG TEXT:", realtimeText);
-  console.log("resp inst before sending to prompt:", instructions.response);
+  console.log('AGG INPUT QUESTION:', question);
+  console.log('AGG META:', JSON.stringify(realtimeMeta, null, 2));
+  console.log('AGG TEXT:', realtimeText);
+  console.log('resp inst before sending to prompt:', instructions.response);
   const openai = await getOpenAI(strapi);
 
   const stream = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: 'gpt-4o-mini',
     temperature: 0.3,
     stream: true,
     messages: [
       {
-        role: "system",
+        role: 'system',
         content: `
 
-        ${instructions.response || ""}
+        ${instructions.response || ''}
 You are an intelligent AI Assistant for a website chatbot.
 
 INPUTS:
@@ -2887,15 +2885,15 @@ Say information unavailable.
 Never show JSON.
 Never hallucinate.
 Max 5 lines.
-`
+`,
       },
       {
-        role: "user",
+        role: 'user',
         content: `
 QUESTION: ${question}
 
 CONTACT_LINK:
-${contactLink || "NOT_AVAILABLE"}
+${contactLink || 'NOT_AVAILABLE'}
 
 FAQ:
 ${JSON.stringify(faq)}
@@ -2905,30 +2903,29 @@ ${JSON.stringify(realtimeMeta)}
 
 REALTIME_TEXT:
 ${realtimeText}
-`
-      }
-    ]
+`,
+      },
+    ],
   });
 
-    for await (const chunk of stream) {
+  for await (const chunk of stream) {
     const token = chunk.choices?.[0]?.delta?.content;
     if (token) {
       ctx.res.write(`data: ${token}\n\n`);
     }
   }
-    if (realtimeMeta && realtimeMeta.type === "list") {
+  if (realtimeMeta && realtimeMeta.type === 'list') {
     const cardsPayload = {
       title: realtimeMeta.collection,
       schema: realtimeMeta.schema,
       items: realtimeMeta.items,
     };
-      ctx.res.write(`event: cards\n`);
+    ctx.res.write(`event: cards\n`);
     ctx.res.write(`data: ${JSON.stringify(cardsPayload)}\n\n`);
   }
 
-  ctx.res.write("data: [DONE]\n\n");
+  ctx.res.write('data: [DONE]\n\n');
   ctx.res.end();
-
 }
 
 async function validateOpenAIKey(key: string) {
@@ -2943,83 +2940,76 @@ async function validateOpenAIKey(key: string) {
 
 export default ({ strapi }: { strapi: any }) => ({
   async validateKey(ctx: any) {
-  const { key } = ctx.request.body;
+    const { key } = ctx.request.body;
 
-  const isValid = await validateOpenAIKey(key);
+    const isValid = await validateOpenAIKey(key);
 
-  ctx.body = { valid: isValid };
-},
+    ctx.body = { valid: isValid };
+  },
   async ask(ctx: any) {
     const { question, history = [] } = ctx.request.body;
 
-
     const instructions = await getInstructions(strapi);
-      console.log("SYSTEM INSTRUCTIONS:", instructions.system);
-      console.log("RESPONSE INSTRUCTIONS:", instructions.response);
+    console.log('SYSTEM INSTRUCTIONS:', instructions.system);
+    console.log('RESPONSE INSTRUCTIONS:', instructions.response);
 
     let jsonContext = ctx.request.body.context || {};
-jsonContext = updateJsonContext(jsonContext, question);
-console.log(" JSON CONTEXT:", JSON.stringify(jsonContext, null, 2));
+    jsonContext = updateJsonContext(jsonContext, question);
+    console.log(' JSON CONTEXT:', JSON.stringify(jsonContext, null, 2));
 
-ctx.set("X-User-Context", JSON.stringify(jsonContext));
-    console.log("QUESTION:", question);
+    ctx.set('X-User-Context', JSON.stringify(jsonContext));
+    console.log('QUESTION:', question);
 
     try {
-  const activeCollections = await getActiveCollections(strapi);
+      const activeCollections = await getActiveCollections(strapi);
 
-  if (!activeCollections || activeCollections.length === 0) {
-    console.log("No active collections");
-  }
+      if (!activeCollections || activeCollections.length === 0) {
+        console.log('No active collections');
+      }
 
-const rewritten = await rephraseQuestion(strapi, history, question);
-  console.log("🧠 REWRITTEN QUESTION:", rewritten);
+      const rewritten = await rephraseQuestion(strapi, history, question);
+      console.log('🧠 REWRITTEN QUESTION:', rewritten);
 
-  const contactLink = await getContactLink(strapi);
-console.log("CONTACT LINK:", contactLink);
+      const contactLink = await getContactLink(strapi);
+      console.log('CONTACT LINK:', contactLink);
 
-  // FAQ
-  const faqResults = await searchFAQ(rewritten, strapi);
-  console.log("📚 FAQ RESULTS:", JSON.stringify(faqResults, null, 2));
+      // FAQ
+      const faqResults = await searchFAQ(rewritten, strapi);
+      console.log('📚 FAQ RESULTS:', JSON.stringify(faqResults, null, 2));
 
-  // PLAN
-  const plan = await simplePlanner(strapi,rewritten, activeCollections, instructions);
-  console.log("📌 PLANNER RESULT:", JSON.stringify(plan, null, 2));
+      // PLAN
+      const plan = await simplePlanner(strapi, rewritten, activeCollections, instructions);
+      console.log('📌 PLANNER RESULT:', JSON.stringify(plan, null, 2));
 
-  // REALTIME
-// REALTIME
-let realtimeResults = null;
-let realtimeAIText = null;
+      // REALTIME
+      // REALTIME
+      let realtimeResults = null;
+      let realtimeAIText = null;
 
-if (plan && plan.collection) {
-  realtimeResults = await searchRealtime(strapi, plan, activeCollections);
-  console.log("⚡ REALTIME RESULTS:", JSON.stringify(realtimeResults, null, 2));
+      if (plan && plan.collection) {
+        realtimeResults = await searchRealtime(strapi, plan, activeCollections);
+        console.log('⚡ REALTIME RESULTS:', JSON.stringify(realtimeResults, null, 2));
 
-  realtimeAIText = await realtimeInterpreterAI(
-    strapi,
-    rewritten,
-    realtimeResults
-  );
-} else {
-  console.log("🟡 Planner chose FAQ path — realtime skipped");
-}
+        realtimeAIText = await realtimeInterpreterAI(strapi, rewritten, realtimeResults);
+      } else {
+        console.log('🟡 Planner chose FAQ path — realtime skipped');
+      }
 
+      await finalAggregator(
+        strapi,
+        ctx,
+        rewritten,
+        faqResults,
+        realtimeResults,
+        realtimeAIText,
+        contactLink,
+        instructions
+      );
 
-await finalAggregator(
-  strapi,
-  ctx,
-  rewritten,
-  faqResults,
-  realtimeResults,
-  realtimeAIText,
-  contactLink,
-  instructions
-);
-
-return;
-
-} catch (err) {
-  console.error("[ERROR]", err);
-  ctx.body = { type: "text", content: "Error occurred." };
-}
+      return;
+    } catch (err) {
+      console.error('[ERROR]', err);
+      ctx.body = { type: 'text', content: 'Error occurred.' };
+    }
   },
 });
