@@ -2183,6 +2183,18 @@ async function getInstructions(strapi: any) {
   };
 }
 
+async function getCardStyles(strapi: any) {
+  const pluginStore = strapi.store({
+    environment: null,
+    type: "plugin",
+    name: "faqchatbot-config",
+  });
+
+  const settings = await pluginStore.get({ key: "settings" });
+
+  return settings?.cardStyles || {};
+}
+
 async function getActiveCollections(strapi: any) {
   try {
     console.log(' [DEBUG] Fetching active collections...');
@@ -2235,6 +2247,7 @@ async function getActiveCollections(strapi: any) {
           'datetime',
           'time',
           'relation',
+          'media',
         ].includes(attr.type)
       );
     });
@@ -2445,17 +2458,51 @@ async function searchRealtime(strapi: any, plan: any, activeCollections: any) {
     }
 
     // LIST / SEARCH OPERATION
+    const contentType = strapi.contentTypes[uid];
+
+    const mediaFields = config.fields.filter((field: string) => {
+      const attr = contentType.attributes[field];
+      return attr?.type === "media";
+    });
+
+    let populateObj: any = undefined;
+
+    if (mediaFields.length > 0) {
+      populateObj = {};
+      mediaFields.forEach((field: string) => {
+        populateObj[field] = true;
+      });
+    }
+
     const result = await strapi.entityService.findMany(uid, {
       filters: sanitizedFilters,
       sort: plan.sort,
       limit: 10,
+      ...(populateObj ? { populate: populateObj } : {}),
     });
 
+    console.log("🖼 RAW STRAPI RESULT:");
+    console.dir(result, { depth: 5 });
+
+
     const cleaned = result.map((row: any) => {
-      const clean: any = {};
-      for (const f of config.fields) clean[f] = row[f];
-      return clean;
-    });
+    const clean: any = {};
+
+    for (const f of config.fields) {
+      const value = row[f];
+
+      // If it's a populated media object
+      if (value && typeof value === "object" && value.url) {
+        console.log(`🖼 Extracted image for field '${f}':`, value.url);
+        clean[f] = value.url;
+      } else {
+        clean[f] = value;
+      }
+    }
+
+    return clean;
+  });
+
 
     return {
       type: 'list',
@@ -2801,7 +2848,8 @@ async function finalAggregator(
   realtimeMeta: any,
   realtimeText: any,
   contactLink: string | null,
-  instructions: { response: string }
+  instructions: { response: string },
+  cardStyles: any
 ) {
   ctx.set('Content-Type', 'text/event-stream');
   ctx.set('Cache-Control', 'no-cache');
@@ -2914,12 +2962,16 @@ ${realtimeText}
       ctx.res.write(`data: ${token}\n\n`);
     }
   }
-  if (realtimeMeta && realtimeMeta.type === 'list') {
+  if (realtimeMeta && realtimeMeta.type === "list") {
+    const collectionUid = `api::${realtimeMeta.collection}.${realtimeMeta.collection}`;
+
     const cardsPayload = {
       title: realtimeMeta.collection,
       schema: realtimeMeta.schema,
       items: realtimeMeta.items,
+      cardStyle: cardStyles?.[collectionUid] || null
     };
+
     ctx.res.write(`event: cards\n`);
     ctx.res.write(`data: ${JSON.stringify(cardsPayload)}\n\n`);
   }
@@ -2973,6 +3025,9 @@ export default ({ strapi }: { strapi: any }) => ({
       const contactLink = await getContactLink(strapi);
       console.log('CONTACT LINK:', contactLink);
 
+      const cardStyles = await getCardStyles(strapi);
+      console.log('CARD STYLES:', cardStyles);
+
       // FAQ
       const faqResults = await searchFAQ(rewritten, strapi);
       console.log('📚 FAQ RESULTS:', JSON.stringify(faqResults, null, 2));
@@ -3003,7 +3058,8 @@ export default ({ strapi }: { strapi: any }) => ({
         realtimeResults,
         realtimeAIText,
         contactLink,
-        instructions
+        instructions,
+        cardStyles
       );
 
       return;

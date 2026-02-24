@@ -538,6 +538,9 @@ export interface ApiFlightFlight extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     destination: Schema.Attribute.String;
     fare: Schema.Attribute.BigInteger;
+    flightImage: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios'
+    >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',

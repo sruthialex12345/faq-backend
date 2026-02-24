@@ -83,6 +83,8 @@ const ChatbotPreview = () => {
 
       setMessages((prev) => [...prev, { text: '', isUser: false }]);
 
+      let isCardsEvent = false;
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -93,8 +95,26 @@ const ChatbotPreview = () => {
         for (let rawLine of lines) {
           const line = rawLine.replace(/\r/g, '');
 
-          if (line.includes('[DONE]')) return;
+          if (!line) continue;
 
+          // Detect cards event
+          if (line.startsWith('event: cards')) {
+            isCardsEvent = true;
+            continue;
+          }
+
+          // Skip card JSON payload
+          if (isCardsEvent && line.startsWith('data: ')) {
+            isCardsEvent = false; // skip only this one
+            continue;
+          }
+
+          // Stop at DONE
+          if (line.includes('[DONE]')) {
+            return;
+          }
+
+          // Normal text token
           if (line.startsWith('data: ')) {
             const token = line.replace('data: ', '');
             botMessage += token;

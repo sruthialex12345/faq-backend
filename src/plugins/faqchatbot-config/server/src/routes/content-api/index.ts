@@ -62,11 +62,5 @@ export default () => ({
       handler: 'suggestQuestionsAndLogo.getSuggestionAndLogo',
       config: { auth: false },
     },
-    {
-      method: 'GET',
-      path: '/card-mapping',
-      handler: 'cardMapping.index',
-      config: { auth: false },
-    },
   ],
 });
